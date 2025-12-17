@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>ZPROVEART</title>
+
+<style>
+body { font-family: Arial, sans-serif; margin: 24px; }
+h1 { margin: 0 0 16px 0; }
+
+/* Grid de tarjetas */
+.grid{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+/* Tarjeta */
+.card{
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    background: #fff;
+}
+
+/* ===== BLOQUES DENTRO DE LA TARJETA ===== */
+.block{
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    padding: 10px;
+    background: #fafafa;
+}
+
+.card-head{ margin-bottom: 10px; }
+.card-body{ margin-bottom: 10px; }
+.card-foot{ margin: 0; }
+
+/* Cabecera */
+.header-row{
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1.5fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.head-item{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Artículo destaca más */
+.header-row .h1{
+    font-size: 14px;
+    font-weight: 800;
+}
+
+/* Proveedor / Familia más ligeros */
+.header-row .h2{
+    font-size: 13px;
+    color: #444;
+}
+
+/* ===== CUERPO: FOTO | ZV | TABLA ===== */
+.body-row{
+    display: grid;
+    grid-template-columns: 260px 1fr 300px; /* foto | zv | tabla */
+    gap: 12px;
+    align-items: stretch;
+}
+
+/* Imagen */
+.thumb{
+    width: 250px;
+    height: 100%;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.thumb img{
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* KV grid (ZV) */
+.kv-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    font-size: 12.5px;
+}
+.kv{
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 6px;
+}
+.kv .k{
+    color: #666;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.kv .v{
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Tabla 12M */
+.m12-title{
+    font-weight: 700;
+    font-size: 12.5px;
+    margin: 0 0 6px 0;
+    color: #333;
+    text-align: center;
+}
+.m12{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+.m12 th{
+    background: #f5f5f5;
+    font-weight: 700;
+    text-align: center;
+    padding: 3px 5px;
+    border: 1px solid #e0e0e0;
+}
+/* SOLO bordes verticales en filas */
+.m12 td{
+    padding: 3px 5px;
+    text-align: right;
+    border-left: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+}
+.m12 td:first-child{
+    text-align: center;
+    font-weight: 600;
+}
+.m12 tr:last-child td{
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Acciones */
+.actions{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+input[type="text"]{
+    flex: 1;
+    padding: 7px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+button{
+    padding: 7px 10px;
+    border: 1px solid #333;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Pager */
+.pager{
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.pager a{
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #000;
+}
+.muted{ color: #666; }
+.disabled{ pointer-events: none; opacity: 0.4; }
+
+/* Responsive */
+@media (max-width: 1000px){
+    .body-row{
+        grid-template-columns: 140px 1fr;
+    }
+    .body-table{
+        grid-column: 1 / -1; /* tabla abajo ocupando todo */
+    }
+}
+</style>
+</head>
+
+<body>
+
+<h1>ZPROVEART</h1>
+
+<div class="grid">
+{% for p in products %}
+<div class="card">
+
+    <!-- CABECERA (Articulo + Proveedor + Familia) -->
+    <div class="block card-head">
+        <div class="header header-row">
+            <div class="head-item h1">
+                ARTÍCULO: {{ p.ITMREF_0 }} - {{ p.ITMDES_0 }}
+            </div>
+            <div class="head-item h2">
+                Proveedor: {{ p.BPSNUM_0 }} - {{ p.BPSNAM_0 }}
+            </div>
+            <div class="head-item h2">
+                Familia: {{ p.COD_FAM_0 }} - {{ p.DES_FAM_0 }}
+            </div>
+        </div>
+    </div>
+
+    <!-- CUERPO (Foto | ZV | Tabla) -->
+    <div class="block card-body">
+        <div class="body-row">
+
+            <!-- Foto -->
+            <div class="thumb">
+                {% if p.URL_0 %}
+                <img src="{{ p.URL_0 }}" alt="Imagen producto">
+                {% else %}
+                <span class="muted">Sin imagen</span>
+                {% endif %}
+            </div>
+
+            <!-- ZV -->
+            <div class="block body-zv">
+                <div class="kv-grid">
+                    <div class="kv"><div class="k">F. últ. compra</div><div class="v">{{ p.FUC_0_FMT }}</div></div>
+                    <div class="kv"><div class="k">UQTY</div><div class="v">{{ p.UQTY_0 }}</div></div>
+                    <div class="kv"><div class="k">FOB</div><div class="v">{{ p.FOB_0_FMT }}</div></div>
+
+                    <div class="kv"><div class="k">P. Unidad</div><div class="v">{{ p.PUE_0_FMT }}</div></div>
+                    <div class="kv"><div class="k">PVP</div><div class="v">{{ p.PVPT4_0_FMT }}</div></div>
+                    <div class="kv"><div class="k">DTO</div><div class="v">{{ p.DTO_0_FMT }}</div></div>
+
+                    <div class="kv"><div class="k">DIF</div><div class="v">{{ p.DIF_0_FMT }}</div></div>
+                    <div class="kv"><div class="k">Arancel</div><div class="v">{{ p.ARANCEL_0_FMT }}</div></div>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="block body-table">
+                <div class="m12-title">Ventas / Compras últimos 12 meses</div>
+                <table class="m12">
+                    <tr>
+                        <th>Mes</th>
+                        <th>Ventas</th>
+                        <th>Compras</th>
+                    </tr>
+                    {% for r in p.m12 %}
+                    <tr>
+                        <td>{{ r.label }}</td>
+                        <td>{{ r.ventas }}</td>
+                        <td>{{ r.compras }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PIE (Checkbox + comentario + botón) -->
+    <div class="block card-foot">
+        <div class="actions">
+            <label><input type="checkbox"> Sel</label>
+            <input type="text" placeholder="Comentario...">
+            <button type="button">Enviar</button>
+        </div>
+    </div>
+
+</div>
+{% endfor %}
+</div>
+
+<div class="pager">
+    <a class="{% if page <= 1 %}disabled{% endif %}"
+       href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}">⬅ Prev</a>
+
+    <span class="muted">Página {{ page }} / {{ total_pages }}</span>
+
+    <a class="{% if page >= total_pages %}disabled{% endif %}"
+       href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}">Next ➡</a>
+</div>
+
+</body>
+</html>
