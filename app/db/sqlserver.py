@@ -1,4 +1,5 @@
 import time
+from datetime import date
 import pyodbc
 pyodbc.pooling = True
 
@@ -28,7 +29,11 @@ def test_connection():
         cursor.execute("SELECT 1")
         return cursor.fetchone()[0]
 
-def count_products(families: list[str] | None = None) -> int:
+def count_products(
+    families: list[str] | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None    
+    ) -> int:
     fams = [f.strip() for f in (families or []) if f and f.strip()]
     
     sql = """
@@ -40,19 +45,36 @@ def count_products(families: list[str] | None = None) -> int:
     """
 
     params = []
+
+    # Filtro familias (si hay)
     if fams:
         sql += " AND Z4.COD_FAM_0 IN (" + ",".join("?" for _ in fams) + ")"
         params.extend(fams)
+    # Filtro fechas (si hay)
+    if date_from:
+        sql += " AND ZTP.FUC_0 >= ?"
+        params.append(date_from)
+
+
+    if date_to:
+        sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)"
+        params.append(date_to)
+
 
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute(sql, params)
         return int(cur.fetchone()[0])
 
-def get_products(page: int, page_size: int, families: list[str] | None = None) -> list[dict]:
+def get_products(page: int, 
+    page_size: int, 
+    families: list[str] | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None
+    ) -> list[dict]:
+    
     fams = [f.strip() for f in (families or []) if f and f.strip()]
-
-    # Base SQL (con paginación)
+    
     sql = """
     DECLARE @Page INT = ?;
     DECLARE @PageSize INT = ?;
@@ -67,7 +89,7 @@ def get_products(page: int, page_size: int, families: list[str] | None = None) -
         ON ZTP.BPSNUM_0 = BPS.BPSNUM_0
     LEFT JOIN ZURLIMAGENES AS ZURL
         ON ZTP.ITMREF_0 = ZURL.ITMREF_0
-    LEFT JOIN GERIMPORT.ZPROART4 AS Z4
+    LEFT JOIN ZPROART4 AS Z4
         ON ZTP.ITMREF_0 = Z4.ITMREF_0
     WHERE COALESCE(ZTP.BPSNUM_0, '') <> ''
     """
@@ -79,6 +101,15 @@ def get_products(page: int, page_size: int, families: list[str] | None = None) -
         placeholders = ",".join("?" for _ in fams)
         sql += f" AND Z4.COD_FAM_0 IN ({placeholders})\n"
         params.extend(fams)
+
+    # Filtro por fechas (si hay)
+    if date_from:
+        sql += " AND ZTP.FUC_0 >= ?\n"
+        params.append(date_from)
+
+    if date_to:
+        sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)\n"
+        params.append(date_to)
 
     # Orden + paginación
     sql += """

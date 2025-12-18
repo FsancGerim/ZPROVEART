@@ -81,6 +81,29 @@ h1 { margin: 0 0 16px 0; }
   align-items: center;
 }
 
+.date-filter{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap; /* permite salto en pantallas pequeñas */
+}
+
+.date-filter label{
+  color: #444;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.date-filter input[type="date"]{
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 13px;
+}
+
 /* Grid de tarjetas */
 .grid{
     display: grid;
@@ -282,6 +305,13 @@ button{
         </label>
     {% endfor %}
     </div>
+    <div class="date-filter">
+        <label class="muted">Desde</label>
+        <input type="date" name="from" value="{{ date_from }}">
+
+        <label class="muted">Hasta</label>
+        <input type="date" name="to" value="{{ date_to }}">
+    </div>
 
     <input type="hidden" name="page" value="1">
 
@@ -378,14 +408,21 @@ button{
     {% for fc in family_list %}
         {% set fam_qs = fam_qs + "&family=" + fc %}
     {% endfor %}
+    {% set date_qs = "" %}
+    {% if date_from %}
+        {% set date_qs = date_qs + "&from=" + date_from %}
+    {% endif %}
+    {% if date_to %}
+        {% set date_qs = date_qs + "&to=" + date_to %}
+    {% endif %}
 
     <a class="{% if page <= 1 %}disabled{% endif %}"
-       href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}{{ fam_qs }}">⬅ Prev</a>
+       href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}{{ fam_qs }}{{ date_qs }}">⬅ Prev</a>
 
     <span class="muted">Página {{ page }} / {{ total_pages }}</span>
 
     <a class="{% if page >= total_pages %}disabled{% endif %}"
-       href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}{{ fam_qs }}">Next ➡</a>
+       href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}{{ fam_qs }}{{ date_qs }}">Next ➡</a>
 </div>
 
 </body>
