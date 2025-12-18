@@ -1,16 +1,21 @@
-from fastapi import FastAPI, Request, Query
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Query, Response
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from app.db.sqlserver import get_products, get_sales_12m, count_products, get_fams_cached
 from app.services.product_formatter import format_products
 from app.services.filters import parse_date
+from app.services.excel_exporter import ExcelExporter, append_row_daily
+from app.config import EXPORT_DIR
 import math
 
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+
+exporter = ExcelExporter(EXPORT_DIR)
+
 
 @app.get("/")
 def root():
@@ -31,7 +36,7 @@ def zproveart_home(request: Request, page: str = "1", family: list[str] = Query(
 
     family_list = [f.strip() for f in family if f and f.strip()]
     PAGE_SIZE = 6
-    total = count_products(family_list)
+    total = count_products(family_list, date_from, date_to)
     total_pages = max(1, math.ceil(total / PAGE_SIZE))
     page = max(1, min(page, total_pages))
 
@@ -58,3 +63,24 @@ def zproveart_home(request: Request, page: str = "1", family: list[str] = Query(
             "date_to": date_to.isoformat() if date_to else "",
         },
     ) 
+
+@app.post("/zproveart/submit")
+async def zproveart_submit(request: Request):
+    form = await request.form()
+
+    itmref = (form.get("itmref") or "").strip()
+    comment = (form.get("comment") or "").strip()
+
+    # Checkbox HTML: si no viene, es False; si viene, puede ser "1" o "on"
+    selected_raw = form.get("selected")
+    selected = selected_raw in ("1", "on", "true", "True")
+
+    if itmref:
+        append_row_daily(
+            exporter,
+            itmref=itmref,
+            selected=selected,
+            comment=comment,
+        )
+
+    return Response(status_code=204)

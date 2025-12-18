@@ -106,11 +106,12 @@
 
     <!-- PIE (Checkbox + comentario + botón) -->
     <div class="block card-foot">
-        <div class="actions">
-            <label><input type="checkbox"> Sel</label>
-            <input type="text" placeholder="Comentario...">
-            <button type="button">Enviar</button>
-        </div>
+        <form class="actions js-send" method="post" action="/zproveart/submit">
+            <input type="hidden" name="itmref" value="{{ p.ITMREF_0 }}">
+            <label><input type="checkbox" name="selected" value="1"> Sel</label>
+            <input type="text" name="comment" placeholder="Comentario...">
+            <button type="submit">Enviar</button>
+        </form>
     </div>
 
 </div>
@@ -139,6 +140,6 @@
     <a class="{% if page >= total_pages %}disabled{% endif %}"
        href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}{{ fam_qs }}{{ date_qs }}">Next ➡</a>
 </div>
-
+<script src="{{ url_for('static', path='js/zproveart.js') }}"></script>
 </body>
 </html>
