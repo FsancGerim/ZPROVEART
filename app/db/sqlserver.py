@@ -1,4 +1,6 @@
+import time
 import pyodbc
+pyodbc.pooling = True
 
 from app.config import (
     SQL_SERVER,
@@ -18,7 +20,7 @@ def get_connection():
         "TrustServerCertificate=yes;"
         "Encrypt=yes;"
     )
-    return pyodbc.connect(conn_str, timeout=10)
+    return pyodbc.connect(conn_str, timeout=10, autocommit=True)
 
 def test_connection():
     with get_connection() as conn:
@@ -26,18 +28,31 @@ def test_connection():
         cursor.execute("SELECT 1")
         return cursor.fetchone()[0]
 
-def count_products() -> int:
+def count_products(families: list[str] | None = None) -> int:
+    fams = [f.strip() for f in (families or []) if f and f.strip()]
+    
     sql = """
     SELECT COUNT(*)
-    FROM [GERIMPORT].[ZTPROVEART] AS ZTP
-    WHERE COALESCE(ZTP.BPSNUM_0, '') <> '';
+    FROM ZTPROVEART AS ZTP
+    LEFT JOIN ZPROART4 AS Z4
+        ON ZTP.ITMREF_0 = Z4.ITMREF_0
+    WHERE COALESCE(ZTP.BPSNUM_0, '') <> ''
     """
+
+    params = []
+    if fams:
+        sql += " AND Z4.COD_FAM_0 IN (" + ",".join("?" for _ in fams) + ")"
+        params.extend(fams)
+
     with get_connection() as conn:
         cur = conn.cursor()
-        cur.execute(sql)
+        cur.execute(sql, params)
         return int(cur.fetchone()[0])
 
-def get_products(page: int, page_size: int) -> list[dict]:
+def get_products(page: int, page_size: int, families: list[str] | None = None) -> list[dict]:
+    fams = [f.strip() for f in (families or []) if f and f.strip()]
+
+    # Base SQL (con paginación)
     sql = """
     DECLARE @Page INT = ?;
     DECLARE @PageSize INT = ?;
@@ -55,13 +70,26 @@ def get_products(page: int, page_size: int) -> list[dict]:
     LEFT JOIN GERIMPORT.ZPROART4 AS Z4
         ON ZTP.ITMREF_0 = Z4.ITMREF_0
     WHERE COALESCE(ZTP.BPSNUM_0, '') <> ''
+    """
+
+    params: list = [page, page_size]
+
+    # Filtro por familias (si hay)
+    if fams:
+        placeholders = ",".join("?" for _ in fams)
+        sql += f" AND Z4.COD_FAM_0 IN ({placeholders})\n"
+        params.extend(fams)
+
+    # Orden + paginación
+    sql += """
     ORDER BY ZTP.ITMREF_0 DESC
     OFFSET (@Page - 1) * @PageSize ROWS
     FETCH NEXT @PageSize ROWS ONLY;
     """
+
     with get_connection() as conn:
         cur = conn.cursor()
-        cur.execute(sql, [page, page_size])
+        cur.execute(sql, params)
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 
@@ -96,3 +124,27 @@ def get_sales_12m(itmrefs: list[str]) -> list[dict]:
         cur.execute(sql, itmrefs)
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+# BLOQUE DE OBTENER FAMILIAS CON CACHÉ
+def _get_fams_distinct() -> list[dict]:
+    sql = f"""
+    SELECT DISTINCT COD_FAM_0, DES_FAM_0
+    FROM ZPROART4;
+    """
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(sql)
+        cols = [c[0] for c in cur.description]
+        return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+_FAMS_CACHE = {"ts": 0.0, "data": []}
+_FAMS_TTL = 60 * 10  # 10 minutos en caché
+def get_fams_cached() -> list[dict]:
+    now = time.time()
+    if _FAMS_CACHE["data"] and (now - _FAMS_CACHE["ts"]) < _FAMS_TTL:
+        return _FAMS_CACHE["data"]
+
+    data = _get_fams_distinct()
+    _FAMS_CACHE["data"] = data
+    _FAMS_CACHE["ts"] = now
+    return data

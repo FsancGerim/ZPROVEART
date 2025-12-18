@@ -8,6 +8,79 @@
 body { font-family: Arial, sans-serif; margin: 24px; }
 h1 { margin: 0 0 16px 0; }
 
+/* Zona de filtros */
+.filters{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 12px 0;
+}
+
+.filters.block{
+  background: #fafafa;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.filters label{
+  color: #444;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.filters select{
+  min-width: 260px;
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.filters button{
+  padding: 7px 10px;
+  border: 1px solid #333;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filters-title{
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.fam-list{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 6px 14px;
+  max-height: 140px;      
+  overflow: auto;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+}
+
+.fam-text{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+.fam-item input{
+  margin: 0;
+}
+
+
+.filters-actions{
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 /* Grid de tarjetas */
 .grid{
     display: grid;
@@ -199,6 +272,23 @@ button{
 
 <h1>ZPROVEART</h1>
 
+<form class="filters block" method="get" action="/zproveart">
+    <div class="fam-list">
+    {% for f in families %}
+        <label class="fam-item">
+            <input type="checkbox" name="family" value="{{ f.COD_FAM_0 }}"
+                {% if f.COD_FAM_0 in family_list %}checked{% endif %}>
+            <span class="fam-text">{{ f.COD_FAM_0 }} - {{ f.DES_FAM_0 }}</span>
+        </label>
+    {% endfor %}
+    </div>
+
+    <input type="hidden" name="page" value="1">
+
+    <button type="submit">Aplicar Filtros</button>
+
+</form>
+
 <div class="grid">
 {% for p in products %}
 <div class="card">
@@ -283,13 +373,19 @@ button{
 </div>
 
 <div class="pager">
+
+    {% set fam_qs = "" %}
+    {% for fc in family_list %}
+        {% set fam_qs = fam_qs + "&family=" + fc %}
+    {% endfor %}
+
     <a class="{% if page <= 1 %}disabled{% endif %}"
-       href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}">⬅ Prev</a>
+       href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}{{ fam_qs }}">⬅ Prev</a>
 
     <span class="muted">Página {{ page }} / {{ total_pages }}</span>
 
     <a class="{% if page >= total_pages %}disabled{% endif %}"
-       href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}">Next ➡</a>
+       href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}{{ fam_qs }}">Next ➡</a>
 </div>
 
 </body>
