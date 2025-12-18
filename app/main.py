@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from app.db.sqlserver import get_products, get_sales_12m, count_products, get_fams_cached
 from app.services.product_formatter import format_products
 from app.services.filters import parse_date
@@ -8,6 +9,7 @@ import math
 
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 @app.get("/")
