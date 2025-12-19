@@ -39,14 +39,17 @@ def zproveart_home(request: Request, page: str = "1", family: list[str] = Query(
     # comprador
     comp_from = request.query_params.get("comp_from")
     comp_to = request.query_params.get("comp_to")
+    # artículos
+    art_from = request.query_params.get("art_from")
+    art_to = request.query_params.get("art_to")
 
     family_list = [str(f).strip() for f in family if f and str(f).strip()]
     PAGE_SIZE = 6
-    total = count_products(family_list, date_from, date_to, supp_from, supp_to, comp_from, comp_to)
+    total = count_products(family_list, date_from, date_to, supp_from, supp_to, comp_from, comp_to, art_from, art_to)
     total_pages = max(1, math.ceil(total / PAGE_SIZE))
     page = max(1, min(page, total_pages))
 
-    products = get_products(page, PAGE_SIZE, family_list, date_from, date_to, supp_from, supp_to, comp_from, comp_to)
+    products = get_products(page, PAGE_SIZE, family_list, date_from, date_to, supp_from, supp_to, comp_from, comp_to, art_from, art_to)
 
     itmrefs = [p["ITMREF_0"] for p in products if p.get("ITMREF_0")]
     sales_rows = get_sales_12m(itmrefs)
@@ -72,6 +75,8 @@ def zproveart_home(request: Request, page: str = "1", family: list[str] = Query(
             "supp_to": supp_to,
             "comp_from": comp_from,
             "comp_to": comp_to,
+            "art_from": art_from,
+            "art_to": art_to,
         },
     ) 
 

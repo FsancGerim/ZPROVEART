@@ -60,6 +60,16 @@
             <input type="text" name="comp_to" maxlength="4" value="{{ comp_to or '' }}">
         </div>
 
+        <!-- Artículo -->
+         <div class="filter-title">Artículo</div>
+        <div class="filter-row">
+            <label>Desde</label>
+            <input type="text" name="art_from" maxlength="13" pattern="\d{13}" value="{{ art_from or '' }}">
+
+            <label>Hasta</label>
+            <input type="text" name="art_to" maxlength="13" pattern="\d{13}" value="{{ art_to or '' }}">
+        </div>
+
         <!-- Botón -->
         <div class="filters-actions">
             <input type="hidden" name="page" value="1">

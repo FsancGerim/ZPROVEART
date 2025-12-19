@@ -37,7 +37,9 @@ def count_products(
     supp_from: str | None = None,
     supp_to: str | None = None,
     comp_from: str | None = None,
-    comp_to: str | None = None
+    comp_to: str | None = None,
+    art_from: str | None = None,
+    art_to: str | None = None
 ) -> int:
     fams = [f.strip() for f in (families or []) if f and f.strip()]
 
@@ -49,6 +51,13 @@ def count_products(
     """
 
     params: list = []
+
+    if art_from:
+        sql += " AND ZTP.ITMREF_0 >= ?\n"
+        params.append(art_from)
+    if art_to:
+        sql += " AND ZTP.ITMREF_0 <= ?\n"
+        params.append(art_to)
 
     if supp_from:
         sql += " AND ZTP.BPSNUM_0 >= ?\n"
@@ -99,7 +108,9 @@ def get_products(
     supp_from: Optional[str] = None,
     supp_to: Optional[str] = None,
     comp_from: Optional[str] = None,
-    comp_to: Optional[str] = None
+    comp_to: Optional[str] = None,
+    art_from: Optional[str] = None,
+    art_to: Optional[str] = None
 ) -> list[dict]:
 
     fams = [f.strip() for f in (families or []) if f and f.strip()]
@@ -126,6 +137,14 @@ def get_products(
     """
 
     params: list = [page, page_size]
+
+    
+    if art_from:
+        sql += " AND ZTP.ITMREF_0 >= ?\n"
+        params.append(art_from)
+    if art_to:
+        sql += " AND ZTP.ITMREF_0 <= ?\n"
+        params.append(art_to)
 
     if supp_from:
         sql += " AND ZTP.BPSNUM_0 >= ?\n"
