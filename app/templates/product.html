@@ -14,8 +14,8 @@
     <div class="fam-list">
     {% for f in families %}
         <label class="fam-item">
-            <input type="checkbox" name="family" value="{{ f.COD_FAM_0 }}"
-                {% if f.COD_FAM_0 in family_list %}checked{% endif %}>
+            <input type="checkbox" name="family" value="{{ f.COD_FAM_0|string }}"
+                {% if (f.COD_FAM_0|string) in family_list %}checked{% endif %}>
             <span class="fam-text">{{ f.COD_FAM_0 }} - {{ f.DES_FAM_0 }}</span>
         </label>
     {% endfor %}
@@ -59,11 +59,21 @@
 
             <!-- Foto -->
             <div class="thumb">
-                {% if p.URL_0 %}
-                <img src="{{ p.URL_0 }}" alt="Imagen producto">
-                {% else %}
+            {% if p.URL_0 %}
+                <img
+                src="{{ p.URL_0 }}"
+                alt="Imagen producto"
+                onerror="
+                    if (!this.dataset.ch) {
+                    this.dataset.ch = '1';
+                    this.src = this.src.replace(/\.jpg$/i, '_ch.jpg');
+                    } else {
+                    this.style.display = 'none';
+                    }
+                ">
+            {% else %}
                 <span class="muted">Sin imagen</span>
-                {% endif %}
+            {% endif %}
             </div>
 
             <!-- ZV -->
@@ -119,7 +129,7 @@
 </div>
 
 <div class="pager">
-
+    <!--
     {% set fam_qs = "" %}
     {% for fc in family_list %}
         {% set fam_qs = fam_qs + "&family=" + fc %}
@@ -139,6 +149,24 @@
 
     <a class="{% if page >= total_pages %}disabled{% endif %}"
        href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}{{ fam_qs }}{{ date_qs }}">Next ➡</a>
+
+    -->
+    <a class="{% if page <= 1 %}disabled{% endif %}"
+        href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}
+        {%- for fc in family_list -%}&family={{ fc|urlencode }}{%- endfor -%}
+        {%- if date_from -%}&from={{ date_from }}{%- endif -%}
+        {%- if date_to -%}&to={{ date_to }}{%- endif -%}
+        ">⬅ Prev</a>
+
+    <span class="muted">Página {{ page }} / {{ total_pages }}</span>
+
+    <a class="{% if page >= total_pages %}disabled{% endif %}"
+        href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}
+        {%- for fc in family_list -%}&family={{ fc|urlencode }}{%- endfor -%}
+        {%- if date_from -%}&from={{ date_from }}{%- endif -%}
+        {%- if date_to -%}&to={{ date_to }}{%- endif -%}
+        ">Next ➡</a>
+
 </div>
 <script src="{{ url_for('static', path='js/zproveart.js') }}"></script>
 </body>

@@ -1,6 +1,7 @@
 import time
 from datetime import date
 import pyodbc
+from typing import List, Dict, Optional
 pyodbc.pooling = True
 
 from app.config import (
@@ -32,77 +33,31 @@ def test_connection():
 def count_products(
     families: list[str] | None = None,
     date_from: date | None = None,
-    date_to: date | None = None    
-    ) -> int:
-    fams = [f.strip() for f in (families or []) if f and f.strip()]
-    
-    sql = """
-    SELECT COUNT(*)
-    FROM ZTPROVEART AS ZTP
-    LEFT JOIN ZPROART4 AS Z4
-        ON ZTP.ITMREF_0 = Z4.ITMREF_0
-    WHERE COALESCE(ZTP.BPSNUM_0, '') <> ''
-    """
-
-    params = []
-
-    # Filtro familias (si hay)
-    if fams:
-        sql += " AND Z4.COD_FAM_0 IN (" + ",".join("?" for _ in fams) + ")"
-        params.extend(fams)
-    # Filtro fechas (si hay)
-    if date_from:
-        sql += " AND ZTP.FUC_0 >= ?"
-        params.append(date_from)
-
-
-    if date_to:
-        sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)"
-        params.append(date_to)
-
-
-    with get_connection() as conn:
-        cur = conn.cursor()
-        cur.execute(sql, params)
-        return int(cur.fetchone()[0])
-
-def get_products(page: int, 
-    page_size: int, 
-    families: list[str] | None = None,
-    date_from: date | None = None,
     date_to: date | None = None
-    ) -> list[dict]:
-    
+) -> int:
     fams = [f.strip() for f in (families or []) if f and f.strip()]
-    
-    sql = """
-    DECLARE @Page INT = ?;
-    DECLARE @PageSize INT = ?;
 
-    SELECT
-        ZTP.ITMREF_0, ZTP.ITMDES_0, ZTP.BPSNUM_0, ZURL.URL_0,
-        ZTP.FUC_0, ZTP.UQTY_0, ZTP.FOB_0, ZTP.PUE_0, ZTP.PVPT4_0, ZTP.DTO_0, ZTP.DIF_0, ZTP.ARANCEL_0,
-        BPS.BPSNAM_0,
-        Z4.COD_FAM_0, Z4.DES_FAM_0
+    sql = """
+    SELECT COUNT(1)
     FROM ZTPROVEART AS ZTP
-    LEFT JOIN BPSUPPLIER AS BPS
-        ON ZTP.BPSNUM_0 = BPS.BPSNUM_0
-    LEFT JOIN ZURLIMAGENES AS ZURL
-        ON ZTP.ITMREF_0 = ZURL.ITMREF_0
-    LEFT JOIN ZPROART4 AS Z4
-        ON ZTP.ITMREF_0 = Z4.ITMREF_0
-    WHERE COALESCE(ZTP.BPSNUM_0, '') <> ''
+    WHERE ZTP.BPSNUM_0 IS NOT NULL
+      AND ZTP.BPSNUM_0 <> ''
     """
 
-    params: list = [page, page_size]
+    params: list = []
 
-    # Filtro por familias (si hay)
     if fams:
         placeholders = ",".join("?" for _ in fams)
-        sql += f" AND Z4.COD_FAM_0 IN ({placeholders})\n"
+        sql += f"""
+        AND EXISTS (
+            SELECT 1
+            FROM ZPROART4 AS Z4
+            WHERE Z4.ITMREF_0 = ZTP.ITMREF_0
+              AND Z4.COD_FAM_0 IN ({placeholders})
+        )
+        """
         params.extend(fams)
 
-    # Filtro por fechas (si hay)
     if date_from:
         sql += " AND ZTP.FUC_0 >= ?\n"
         params.append(date_from)
@@ -111,11 +66,81 @@ def get_products(page: int,
         sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)\n"
         params.append(date_to)
 
-    # Orden + paginación
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(sql, params)
+        return int(cur.fetchone()[0])
+
+
+def get_products(
+    page: int,
+    page_size: int,
+    families: Optional[list[str]] = None,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None
+) -> list[dict]:
+
+    fams = [f.strip() for f in (families or []) if f and f.strip()]
+
+    sql = """
+    DECLARE @Page INT = ?;
+    DECLARE @PageSize INT = ?;
+
+    WITH base AS (
+        SELECT
+            ZTP.ITMREF_0,
+            ZTP.ITMDES_0,
+            ZTP.BPSNUM_0,
+            ZTP.FUC_0, ZTP.UQTY_0, ZTP.FOB_0, ZTP.PUE_0, ZTP.PVPT4_0, ZTP.DTO_0, ZTP.DIF_0, ZTP.ARANCEL_0
+        FROM ZTPROVEART AS ZTP
+        WHERE ZTP.BPSNUM_0 IS NOT NULL
+          AND ZTP.BPSNUM_0 <> ''
+    """
+
+    params: list = [page, page_size]
+
+    # Filtro familias: EXISTS (evita inflar filas y suele planear mejor)
+    if fams:
+        placeholders = ",".join("?" for _ in fams)
+        sql += f"""
+          AND EXISTS (
+              SELECT 1
+              FROM ZPROART4 AS Z4
+              WHERE Z4.ITMREF_0 = ZTP.ITMREF_0
+                AND Z4.COD_FAM_0 IN ({placeholders})
+          )
+        """
+        params.extend(fams)
+
+    # Filtro fechas (SARGable)
+    if date_from:
+        sql += " AND ZTP.FUC_0 >= ?\n"
+        params.append(date_from)
+
+    if date_to:
+        sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)\n"
+        params.append(date_to)
+
+    # Paginación dentro del CTE (antes de joins)
     sql += """
-    ORDER BY ZTP.ITMREF_0 DESC
-    OFFSET (@Page - 1) * @PageSize ROWS
-    FETCH NEXT @PageSize ROWS ONLY;
+        ORDER BY ZTP.FUC_0 DESC, ZTP.ITMREF_0 DESC
+        OFFSET (@Page - 1) * @PageSize ROWS
+        FETCH NEXT @PageSize ROWS ONLY
+    )
+    SELECT
+        base.ITMREF_0, base.ITMDES_0, base.BPSNUM_0,
+        ZURL.URL_0,
+        base.FUC_0, base.UQTY_0, base.FOB_0, base.PUE_0, base.PVPT4_0, base.DTO_0, base.DIF_0, base.ARANCEL_0,
+        BPS.BPSNAM_0,
+        Z4.COD_FAM_0, Z4.DES_FAM_0
+    FROM base
+    LEFT JOIN BPSUPPLIER AS BPS
+        ON base.BPSNUM_0 = BPS.BPSNUM_0
+    LEFT JOIN ZURLIMAGENES AS ZURL
+        ON base.ITMREF_0 = ZURL.ITMREF_0
+    LEFT JOIN ZPROART4 AS Z4
+        ON base.ITMREF_0 = Z4.ITMREF_0
+    ORDER BY base.FUC_0 DESC, base.ITMREF_0 DESC;
     """
 
     with get_connection() as conn:

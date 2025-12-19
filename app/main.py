@@ -34,7 +34,7 @@ def zproveart_home(request: Request, page: str = "1", family: list[str] = Query(
     if date_from and date_to and date_from > date_to:
         date_from, date_to = date_to, date_from
 
-    family_list = [f.strip() for f in family if f and f.strip()]
+    family_list = [str(f).strip() for f in family if f and str(f).strip()]
     PAGE_SIZE = 6
     total = count_products(family_list, date_from, date_to)
     total_pages = max(1, math.ceil(total / PAGE_SIZE))
