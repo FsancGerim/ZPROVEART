@@ -33,7 +33,9 @@ def test_connection():
 def count_products(
     families: list[str] | None = None,
     date_from: date | None = None,
-    date_to: date | None = None
+    date_to: date | None = None,
+    supp_from: str | None = None,
+    supp_to: str | None = None
 ) -> int:
     fams = [f.strip() for f in (families or []) if f and f.strip()]
 
@@ -45,6 +47,13 @@ def count_products(
     """
 
     params: list = []
+
+    if supp_from:
+        sql += " AND ZTP.BPSNUM_0 >= ?\n"
+        params.append(supp_from)
+    if supp_to:
+        sql += " AND ZTP.BPSNUM_0 <= ?\n"
+        params.append(supp_to)
 
     if fams:
         placeholders = ",".join("?" for _ in fams)
@@ -77,7 +86,9 @@ def get_products(
     page_size: int,
     families: Optional[list[str]] = None,
     date_from: Optional[date] = None,
-    date_to: Optional[date] = None
+    date_to: Optional[date] = None,
+    supp_from: Optional[str] = None,
+    supp_to: Optional[str] = None
 ) -> list[dict]:
 
     fams = [f.strip() for f in (families or []) if f and f.strip()]
@@ -98,6 +109,14 @@ def get_products(
     """
 
     params: list = [page, page_size]
+
+    if supp_from:
+        sql += " AND ZTP.BPSNUM_0 >= ?\n"
+        params.append(supp_from)
+
+    if supp_to:
+        sql += " AND ZTP.BPSNUM_0 <= ?\n"
+        params.append(supp_to)
 
     # Filtro familias: EXISTS (evita inflar filas y suele planear mejor)
     if fams:

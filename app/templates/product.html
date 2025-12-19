@@ -11,6 +11,8 @@
 <h1>ZPROVEART</h1>
 
 <form class="filters block" method="get" action="/zproveart">
+
+    <!-- IZQUIERDA: familias -->
     <div class="fam-list">
     {% for f in families %}
         <label class="fam-item">
@@ -20,18 +22,41 @@
         </label>
     {% endfor %}
     </div>
-    <div class="date-filter">
-        <label class="muted">Desde</label>
-        <input type="date" name="from" value="{{ date_from }}">
 
-        <label class="muted">Hasta</label>
-        <input type="date" name="to" value="{{ date_to }}">
+    <!-- DERECHA: filtros agrupados en columna -->
+    <div class="filters-right">
+
+        <!-- Fechas -->
+        <div class="filter-title">Fecha</div>
+        <div class="filter-row">
+            <label class="muted">Desde</label>
+            <input type="date" name="from" value="{{ date_from }}">
+
+            <label class="muted">Hasta</label>
+            <input type="date" name="to" value="{{ date_to }}">
+        </div>
+
+        <!-- Proveedor -->
+        <div class="filter-title">Proveedor</div>
+        <div class="filter-row">
+            <label>Desde</label>
+            <input type="text" name="supp_from"
+                inputmode="numeric" pattern="\d{5}" maxlength="5"
+                value="{{ supp_from or '' }}">
+
+            <label>Hasta</label>
+            <input type="text" name="supp_to"
+                inputmode="numeric" pattern="\d{5}" maxlength="5"
+                value="{{ supp_to or '' }}">
+        </div>
+
+        <!-- Botón -->
+        <div class="filters-actions">
+            <input type="hidden" name="page" value="1">
+            <button type="submit">Aplicar Filtros</button>
+        </div>
+
     </div>
-
-    <input type="hidden" name="page" value="1">
-
-    <button type="submit">Aplicar Filtros</button>
-
 </form>
 
 <div class="grid">
@@ -129,33 +154,13 @@
 </div>
 
 <div class="pager">
-    <!--
-    {% set fam_qs = "" %}
-    {% for fc in family_list %}
-        {% set fam_qs = fam_qs + "&family=" + fc %}
-    {% endfor %}
-    {% set date_qs = "" %}
-    {% if date_from %}
-        {% set date_qs = date_qs + "&from=" + date_from %}
-    {% endif %}
-    {% if date_to %}
-        {% set date_qs = date_qs + "&to=" + date_to %}
-    {% endif %}
-
-    <a class="{% if page <= 1 %}disabled{% endif %}"
-       href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}{{ fam_qs }}{{ date_qs }}">⬅ Prev</a>
-
-    <span class="muted">Página {{ page }} / {{ total_pages }}</span>
-
-    <a class="{% if page >= total_pages %}disabled{% endif %}"
-       href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}{{ fam_qs }}{{ date_qs }}">Next ➡</a>
-
-    -->
     <a class="{% if page <= 1 %}disabled{% endif %}"
         href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}
         {%- for fc in family_list -%}&family={{ fc|urlencode }}{%- endfor -%}
         {%- if date_from -%}&from={{ date_from }}{%- endif -%}
         {%- if date_to -%}&to={{ date_to }}{%- endif -%}
+        {%- if supp_from -%}&supp_from={{ supp_from }}{%- endif -%}
+        {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
         ">⬅ Prev</a>
 
     <span class="muted">Página {{ page }} / {{ total_pages }}</span>
@@ -165,6 +170,8 @@
         {%- for fc in family_list -%}&family={{ fc|urlencode }}{%- endfor -%}
         {%- if date_from -%}&from={{ date_from }}{%- endif -%}
         {%- if date_to -%}&to={{ date_to }}{%- endif -%}
+        {%- if supp_from -%}&supp_from={{ supp_from }}{%- endif -%}
+        {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
         ">Next ➡</a>
 
 </div>

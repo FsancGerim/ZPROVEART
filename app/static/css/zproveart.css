@@ -12,18 +12,26 @@ h1 {
 
 
 /* =========================
-   FILTROS (familias + fechas)
+   FILTROS (familias + fechas + proveedor)
    ========================= */
+/* Minitítulo encima de cada grupo de filtros */
+.filter-title{ /* Falta meter el center pero tdavía no pq se va a bullas */
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    margin-top: 4px;
+    margin-bottom: -2px; /* acerca el título a la fila */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 
-/* Contenedor principal del bloque de filtros */
 .filters {
     display: flex;
     gap: 10px;
-    align-items: center;
+    align-items: flex-start;
     margin: 0 0 12px 0;
 }
 
-/* Reutiliza el look "block" de las tarjetas */
 .filters.block {
     background: #fafafa;
     border: 1px solid #e6e6e6;
@@ -31,14 +39,12 @@ h1 {
     padding: 10px;
 }
 
-/* Etiquetas de filtros */
 .filters label {
     color: #444;
     font-weight: 600;
     white-space: nowrap;
 }
 
-/* Botón del bloque de filtros */
 .filters button {
     padding: 7px 10px;
     border: 1px solid #333;
@@ -47,7 +53,7 @@ h1 {
     cursor: pointer;
 }
 
-/* Lista de familias (checkboxes) */
+/* Familias */
 .fam-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(240px, 1fr));
@@ -60,7 +66,6 @@ h1 {
     border-radius: 8px;
 }
 
-/* Texto de cada familia */
 .fam-text {
     white-space: nowrap;
     overflow: hidden;
@@ -68,27 +73,34 @@ h1 {
     font-size: 13px;
 }
 
-/* Evita márgenes raros del checkbox */
-.fam-item input {
+.fam-item input { margin: 0; }
+
+/* Derecha */
+.filters-right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    min-width: 520px;
+}
+
+/* Rejilla común */
+.filter-row {
+    display: grid;
+    grid-template-columns: 100px 180px 180px 160px; /* Desde | input | Hasta | input */
+    gap: 1px 1px;
+    align-items: center;
     margin: 0;
 }
-
-/* Filtro de fechas */
-.date-filter {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: 10px;
-    flex-wrap: wrap; /* En móvil se apilan */
+.filter-row label{
+  text-align: right;
+  padding-right: 4px;   /* antes 6px → más cerca */
+  line-height: 1;
 }
 
-.date-filter label {
-    color: #444;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.date-filter input[type="date"] {
+/* Inputs en filtros (date + text) */
+.filter-row input {
+    width: 160px;
     padding: 7px 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -97,11 +109,32 @@ h1 {
     font-size: 13px;
 }
 
+/* Botón */
+.filters-actions {
+    display: flex;
+    justify-content: flex-start; /* o flex-end si lo prefieres */
+}
+
+/* Responsive: apilar en 2 columnas (label + input) */
+@media (max-width: 900px) {
+    .filters { flex-direction: column; }
+    .filters-right { min-width: 0; width: 100%; }
+    .fam-list { width: 100%; }
+
+    .filter-row {
+        grid-template-columns: 70px 1fr;
+    }
+
+    .filter-row input {
+        width: 100%;
+    }
+}
+
+
 
 /* =========================
    GRID DE TARJETAS
    ========================= */
-
 .grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -112,7 +145,6 @@ h1 {
 /* =========================
    TARJETA PRINCIPAL
    ========================= */
-
 .card {
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -137,7 +169,6 @@ h1 {
 /* =========================
    CABECERA DE TARJETA
    ========================= */
-
 .header-row {
     display: grid;
     grid-template-columns: 2fr 1.5fr 1.5fr;
@@ -145,20 +176,17 @@ h1 {
     align-items: center;
 }
 
-/* Evita que textos largos rompan el layout */
 .head-item {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* Artículo: mayor peso visual */
 .header-row .h1 {
     font-size: 14px;
     font-weight: 800;
 }
 
-/* Proveedor y familia */
 .header-row .h2 {
     font-size: 13px;
     color: #444;
@@ -168,15 +196,13 @@ h1 {
 /* =========================
    CUERPO: FOTO | ZV | TABLA
    ========================= */
-
 .body-row {
     display: grid;
-    grid-template-columns: 260px 1fr 300px; /* foto | datos | tabla */
+    grid-template-columns: 260px 1fr 300px;
     gap: 12px;
     align-items: stretch;
 }
 
-/* Imagen del producto */
 .thumb {
     width: 250px;
     height: 100%;
@@ -197,9 +223,8 @@ h1 {
 
 
 /* =========================
-   ZONA ZV (datos comerciales)
+   ZONA ZV
    ========================= */
-
 .kv-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -229,7 +254,6 @@ h1 {
 /* =========================
    TABLA 12 MESES
    ========================= */
-
 .m12-title {
     font-weight: 700;
     font-size: 12.5px;
@@ -252,7 +276,6 @@ h1 {
     border: 1px solid #e0e0e0;
 }
 
-/* Solo bordes verticales en filas (estética ERP) */
 .m12 td {
     padding: 3px 5px;
     text-align: right;
@@ -273,14 +296,14 @@ h1 {
 /* =========================
    ACCIONES (checkbox + comentario)
    ========================= */
-
 .actions {
     display: flex;
     gap: 8px;
     align-items: center;
 }
 
-input[type="text"] {
+/* ✅ IMPORTANTE: el flex:1 SOLO para el comentario de tarjeta */
+.actions input[type="text"] {
     flex: 1;
     padding: 7px;
     border: 1px solid #ccc;
@@ -299,7 +322,6 @@ button {
 /* =========================
    PAGINADOR
    ========================= */
-
 .pager {
     margin-top: 16px;
     display: flex;
@@ -324,15 +346,14 @@ button {
 
 
 /* =========================
-   RESPONSIVE
+   RESPONSIVE TARJETAS
    ========================= */
-
 @media (max-width: 1000px) {
     .body-row {
         grid-template-columns: 140px 1fr;
     }
 
     .body-table {
-        grid-column: 1 / -1; /* tabla ocupa todo debajo */
+        grid-column: 1 / -1;
     }
 }
