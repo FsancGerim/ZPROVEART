@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, Query, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from app.db.sqlserver import get_products, get_sales_12m, count_products, get_fams_cached
+from app.db.sqlserver import get_products, get_sales_12m, count_products, get_fams_cached, get_eta_rows
 from app.services.product_formatter import format_products
 from app.services.filters import parse_date
 from app.services.excel_exporter import ExcelExporter, append_row_daily
@@ -47,8 +47,9 @@ def zproveart_home(request: Request, page: str = "1", family: list[str] = Query(
 
     itmrefs = [p["ITMREF_0"] for p in products if p.get("ITMREF_0")]
     sales_rows = get_sales_12m(itmrefs)
+    eta_rows = get_eta_rows(itmrefs)
 
-    products = format_products(products, sales_rows=sales_rows)
+    products = format_products(products, sales_rows=sales_rows, eta_rows=eta_rows)
     families = get_fams_cached()
 
 

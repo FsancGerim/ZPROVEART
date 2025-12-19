@@ -117,6 +117,31 @@
                 </div>
             </div>
 
+            <!-- ZV2 -->
+            <div class="block body-zv body-zv2">
+                <div class="kv-grid">
+                    <div class="kv"><div class="k">EXIST. ACTUALES</div><div class="v">{{ p.EX_ACT_0_FMT }}</div></div>
+                    <div class="kv"><div class="k">EXIST. DISPONIBLES</div><div class="v">{{ p.EX_DISP_0_FMT }}</div></div>
+                    <div class="kv"><div class="k">EXIST. EN SC</div><div class="v">{{ p.QTY_PEND_SC_0_FMT }}</div></div>
+                    <div class="kv"><div class="k">EXIST. PREV. ENTRAR.</div><div class="v">{{ p.EX_PREV_0_FMT }}</div></div>
+                    <div class="kv kv-multi">
+                        <div class="k">F. PREVISTA LLEGADA</div>
+                        <div class="v">
+                            {% if p.eta and p.eta|length > 0 %}
+                                {% for r in p.eta %}
+                                    <div>{{ r.fecha }} - {{ r.qty }} - {{ r.vcr }}</div>
+                                {% endfor %}
+                                {% if p.eta_extra and p.eta_extra > 0 %}
+                                    <div class="muted">+{{ p.eta_extra }} más…</div>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tabla -->
             <div class="block body-table">
                 <div class="m12-title">Ventas / Compras últimos 12 meses</div>

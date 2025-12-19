@@ -198,7 +198,7 @@ h1 {
    ========================= */
 .body-row {
     display: grid;
-    grid-template-columns: 260px 1fr 300px;
+    grid-template-columns: 260px 1fr 1fr 300px;
     gap: 12px;
     align-items: stretch;
 }
@@ -227,15 +227,15 @@ h1 {
    ========================= */
 .kv-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 12px;
+    grid-template-columns: 1fr;
+    gap: 8px 10px;
     font-size: 12.5px;
 }
 
 .kv {
     display: grid;
     grid-template-columns: 110px 1fr;
-    gap: 6px;
+    gap: 2px;
 }
 
 .kv .k {
@@ -247,6 +247,19 @@ h1 {
 .kv .v {
     text-align: right;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.kv-multi {
+    align-items: flex-start;
+}
+
+.kv-multi .v {
+    text-align: right;
+    line-height: 1.8;
+}
+
+.kv-multi .v div {
     white-space: nowrap;
 }
 

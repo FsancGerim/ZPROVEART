@@ -102,7 +102,9 @@ def get_products(
             ZTP.ITMREF_0,
             ZTP.ITMDES_0,
             ZTP.BPSNUM_0,
-            ZTP.FUC_0, ZTP.UQTY_0, ZTP.FOB_0, ZTP.PUE_0, ZTP.PVPT4_0, ZTP.DTO_0, ZTP.DIF_0, ZTP.ARANCEL_0
+            ZTP.FUC_0,
+            ZTP.UQTY_0, ZTP.FOB_0, ZTP.PUE_0, ZTP.PVPT4_0, ZTP.DTO_0, ZTP.DIF_0, ZTP.ARANCEL_0,
+            ZTP.EX_ACT_0, ZTP.EX_DISP_0, ZTP.EX_PREV_0
         FROM ZTPROVEART AS ZTP
         WHERE ZTP.BPSNUM_0 IS NOT NULL
           AND ZTP.BPSNUM_0 <> ''
@@ -118,7 +120,6 @@ def get_products(
         sql += " AND ZTP.BPSNUM_0 <= ?\n"
         params.append(supp_to)
 
-    # Filtro familias: EXISTS (evita inflar filas y suele planear mejor)
     if fams:
         placeholders = ",".join("?" for _ in fams)
         sql += f"""
@@ -131,7 +132,6 @@ def get_products(
         """
         params.extend(fams)
 
-    # Filtro fechas (SARGable)
     if date_from:
         sql += " AND ZTP.FUC_0 >= ?\n"
         params.append(date_from)
@@ -140,7 +140,6 @@ def get_products(
         sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)\n"
         params.append(date_to)
 
-    # Paginación dentro del CTE (antes de joins)
     sql += """
         ORDER BY ZTP.FUC_0 DESC, ZTP.ITMREF_0 DESC
         OFFSET (@Page - 1) * @PageSize ROWS
@@ -149,9 +148,12 @@ def get_products(
     SELECT
         base.ITMREF_0, base.ITMDES_0, base.BPSNUM_0,
         ZURL.URL_0,
-        base.FUC_0, base.UQTY_0, base.FOB_0, base.PUE_0, base.PVPT4_0, base.DTO_0, base.DIF_0, base.ARANCEL_0,
+        base.FUC_0,
+        base.UQTY_0, base.FOB_0, base.PUE_0, base.PVPT4_0, base.DTO_0, base.DIF_0, base.ARANCEL_0,
+        base.EX_ACT_0, base.EX_DISP_0, base.EX_PREV_0,
         BPS.BPSNAM_0,
-        Z4.COD_FAM_0, Z4.DES_FAM_0
+        Z4.COD_FAM_0, Z4.DES_FAM_0,
+        Z4.QTY_PEND_SC_0
     FROM base
     LEFT JOIN BPSUPPLIER AS BPS
         ON base.BPSNUM_0 = BPS.BPSNUM_0
@@ -223,3 +225,27 @@ def get_fams_cached() -> list[dict]:
     _FAMS_CACHE["data"] = data
     _FAMS_CACHE["ts"] = now
     return data
+
+def get_eta_rows(itmrefs: list[str]) -> list[dict]:
+    if not itmrefs:
+        return []
+
+    placeholders = ",".join("?" for _ in itmrefs)
+
+    sql = f"""
+    SELECT
+        ITMREF_0,
+        FECHA_0,
+        QTY_0,
+        VCR_0
+    FROM ZPROART3
+    WHERE ITMREF_0 IN ({placeholders})
+      AND FECHA_0 IS NOT NULL
+    ORDER BY ITMREF_0, FECHA_0 ASC;
+    """
+
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(sql, itmrefs)
+        cols = [c[0] for c in cur.description]
+        return [dict(zip(cols, row)) for row in cur.fetchall()]
