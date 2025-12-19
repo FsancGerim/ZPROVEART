@@ -50,6 +50,16 @@
                 value="{{ supp_to or '' }}">
         </div>
 
+        <!-- Comprador -->
+        <div class="filter-title">Comprador</div>
+        <div class="filter-row">
+            <label>Desde</label>
+            <input type="text" name="comp_from" maxlength="4" value="{{ comp_from or '' }}">
+
+            <label>Hasta</label>
+            <input type="text" name="comp_to" maxlength="4" value="{{ comp_to or '' }}">
+        </div>
+
         <!-- Botón -->
         <div class="filters-actions">
             <input type="hidden" name="page" value="1">
@@ -143,25 +153,25 @@
             </div>
 
             <!-- ZV3 LOGÍSTICA -->
-            <div class="block body-zv body-zv3">
-                <div class="kv-grid">
-                    <div class="kv"><div class="k">Cod. art. prov.</div><div class="v">{{ p.COD_ART_PRO_0_FMT }}</div></div>
-                    <div class="kv"><div class="k">Med. pieza</div><div class="v">{{ p.MED_PZ_0_FMT }}</div></div>
-                    <div class="kv"><div class="k">Med. caja</div><div class="v">{{ p.MED_CJ_0_FMT }}</div></div>
-                    <div class="kv"><div class="k">Cubicaje</div><div class="v">{{ p.CUBIC_0_FMT }}</div></div>
+        <div class="block body-zv body-zv3">
+            <div class="kv-grid">
+                <div class="kv"><div class="k">Cod. art. prov.</div><div class="v">{{ p.COD_ART_PRO_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Med. pieza</div><div class="v">{{ p.MED_PZ_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Med. caja</div><div class="v">{{ p.MED_CJ_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Cubicaje</div><div class="v">{{ p.CUBIC_0_FMT }}</div></div>
 
-                    <div class="kv"><div class="k">Unid./Caja</div><div class="v">{{ p.UNXCAJ_0_FMT }}</div></div>
-                    <div class="kv"><div class="k">Unid./Palet</div><div class="v">{{ p.UNXPAL_0_FMT }}</div></div>
-                    <div class="kv"><div class="k">Unid./Paquete</div><div class="v">{{ p.UNXPAQ_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Unid./Caja</div><div class="v">{{ p.UNXCAJ_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Unid./Palet</div><div class="v">{{ p.UNXPAL_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Unid./Paquete</div><div class="v">{{ p.UNXPAQ_0_FMT }}</div></div>
 
-                    <div class="kv"><div class="k">Puerto</div><div class="v">{{ p.ZPUERTO_0_FMT }}</div></div>
-                    <div class="kv"><div class="k">Slim</div><div class="v">{{ p.ZSLIM_0_FMT }}</div></div>
-                    <div class="kv"><div class="k">CMC</div><div class="v">{{ p.CMC_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Puerto</div><div class="v">{{ p.ZPUERTO_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Slim</div><div class="v">{{ p.ZSLIM_0_FMT }}</div></div>
+                <div class="kv"><div class="k">CMC</div><div class="v">{{ p.CMC_0_FMT }}</div></div>
 
-                    <div class="kv"><div class="k">Venta NTV</div><div class="v">{{ p.ZVERNTV_0_FMT }}</div></div>
-                    <div class="kv"><div class="k">Venta sin stock</div><div class="v">{{ p.ZVTASINSTOCK_0_FMT }}</div></div>
-                </div>
+                <div class="kv"><div class="k">Venta NTV</div><div class="v">{{ p.ZVERNTV_0_FMT }}</div></div>
+                <div class="kv"><div class="k">Venta sin stock</div><div class="v">{{ p.ZVTASINSTOCK_0_FMT }}</div></div>
             </div>
+        </div>
 
             <!-- Tabla -->
             <div class="block body-table">
@@ -207,6 +217,8 @@
         {%- if date_to -%}&to={{ date_to }}{%- endif -%}
         {%- if supp_from -%}&supp_from={{ supp_from }}{%- endif -%}
         {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
+        {%- if comp_from -%}&comp_from={{ comp_from }}{%- endif -%}
+        {%- if comp_to -%}&comp_to={{ comp_to }}{%- endif -%}
         ">⬅ Prev</a>
 
     <span class="muted">Página {{ page }} / {{ total_pages }}</span>
@@ -218,6 +230,8 @@
         {%- if date_to -%}&to={{ date_to }}{%- endif -%}
         {%- if supp_from -%}&supp_from={{ supp_from }}{%- endif -%}
         {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
+        {%- if comp_from -%}&comp_from={{ comp_from }}{%- endif -%}
+        {%- if comp_to -%}&comp_to={{ comp_to }}{%- endif -%}
         ">Next ➡</a>
 
 </div>

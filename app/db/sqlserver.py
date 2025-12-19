@@ -35,7 +35,9 @@ def count_products(
     date_from: date | None = None,
     date_to: date | None = None,
     supp_from: str | None = None,
-    supp_to: str | None = None
+    supp_to: str | None = None,
+    comp_from: str | None = None,
+    comp_to: str | None = None
 ) -> int:
     fams = [f.strip() for f in (families or []) if f and f.strip()]
 
@@ -54,6 +56,13 @@ def count_products(
     if supp_to:
         sql += " AND ZTP.BPSNUM_0 <= ?\n"
         params.append(supp_to)
+
+    if comp_from:
+        sql += " AND ZTP.COD_COM_0 >= ?\n"
+        params.append(comp_from)
+    if comp_to:
+        sql += " AND ZTP.COD_COM_0 <= ?\n"
+        params.append(comp_to)
 
     if fams:
         placeholders = ",".join("?" for _ in fams)
@@ -88,7 +97,9 @@ def get_products(
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
     supp_from: Optional[str] = None,
-    supp_to: Optional[str] = None
+    supp_to: Optional[str] = None,
+    comp_from: Optional[str] = None,
+    comp_to: Optional[str] = None
 ) -> list[dict]:
 
     fams = [f.strip() for f in (families or []) if f and f.strip()]
@@ -119,10 +130,16 @@ def get_products(
     if supp_from:
         sql += " AND ZTP.BPSNUM_0 >= ?\n"
         params.append(supp_from)
-
     if supp_to:
         sql += " AND ZTP.BPSNUM_0 <= ?\n"
         params.append(supp_to)
+
+    if comp_from:
+        sql += " AND ZTP.COD_COM_0 >= ?\n"
+        params.append(comp_from)
+    if comp_to:
+        sql += " AND ZTP.COD_COM_0 <= ?\n"
+        params.append(comp_to)
 
     if fams:
         placeholders = ",".join("?" for _ in fams)
