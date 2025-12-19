@@ -104,7 +104,11 @@ def get_products(
             ZTP.BPSNUM_0,
             ZTP.FUC_0,
             ZTP.UQTY_0, ZTP.FOB_0, ZTP.PUE_0, ZTP.PVPT4_0, ZTP.DTO_0, ZTP.DIF_0, ZTP.ARANCEL_0,
-            ZTP.EX_ACT_0, ZTP.EX_DISP_0, ZTP.EX_PREV_0
+            ZTP.EX_ACT_0, ZTP.EX_DISP_0, ZTP.EX_PREV_0,
+            ZTP.COD_ART_PRO_0,
+            ZTP.MED_PZ_0,
+            ZTP.MED_CJ_0,
+            ZTP.CUBIC_0
         FROM ZTPROVEART AS ZTP
         WHERE ZTP.BPSNUM_0 IS NOT NULL
           AND ZTP.BPSNUM_0 <> ''
@@ -151,9 +155,22 @@ def get_products(
         base.FUC_0,
         base.UQTY_0, base.FOB_0, base.PUE_0, base.PVPT4_0, base.DTO_0, base.DIF_0, base.ARANCEL_0,
         base.EX_ACT_0, base.EX_DISP_0, base.EX_PREV_0,
+        base.COD_ART_PRO_0,
+        base.MED_PZ_0,
+        base.MED_CJ_0,
+        base.CUBIC_0,
         BPS.BPSNAM_0,
-        Z4.COD_FAM_0, Z4.DES_FAM_0,
-        Z4.QTY_PEND_SC_0
+        Z4.COD_FAM_0, 
+        Z4.DES_FAM_0,
+        Z4.QTY_PEND_SC_0,
+        Z4.UNXCAJ_0,
+        Z4.UNXPAL_0,
+        Z4.UNXPAQ_0,
+        Z4.ZPUERTO_0,
+        Z4.ZSLIM_0,
+        Z4.CMC_0,
+        Z4.ZVERNTV_0,
+        Z4.ZVTASINSTOCK_0
     FROM base
     LEFT JOIN BPSUPPLIER AS BPS
         ON base.BPSNUM_0 = BPS.BPSNUM_0
