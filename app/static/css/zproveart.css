@@ -14,13 +14,14 @@ h1 {
 /* =========================
    FILTROS (familias + fechas + proveedor)
    ========================= */
+
 /* Minitítulo encima de cada grupo de filtros */
-.filter-title{ /* Falta meter el center pero tdavía no pq se va a bullas */
+.filter-title {
     font-size: 12px;
     font-weight: 700;
     color: #555;
     margin-top: 4px;
-    margin-bottom: -2px; /* acerca el título a la fila */
+    margin-bottom: -2px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -53,15 +54,15 @@ h1 {
     cursor: pointer;
 }
 
-/* Familias */
+/* =========================
+   FAMILIAS
+   ========================= */
 .fam-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(240px, 1fr));
     gap: 6px 14px;
-
-    max-height: 240px;             
+    max-height: 170px;
     overflow-y: auto;
-
     padding: 6px;
     background: #fff;
     border: 1px solid #e6e6e6;
@@ -75,32 +76,54 @@ h1 {
     font-size: 13px;
 }
 
-.fam-item input { margin: 0; }
-
-/* Derecha */
-.filters-right {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex: 1;
-    min-width: 520px;
-}
-
-/* Rejilla común */
-.filter-row {
-    display: grid;
-    grid-template-columns: 100px 180px 180px 160px; /* Desde | input | Hasta | input */
-    gap: 1px 1px;
-    align-items: center;
+.fam-item input {
     margin: 0;
 }
-.filter-row label{
-  text-align: right;
-  padding-right: 4px;   /* antes 6px → más cerca */
-  line-height: 1;
+
+
+/* =========================
+   FILTROS DERECHA (GRID)
+   ========================= */
+.filters-right{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+  align-content: start;
+  flex: 1;
+  min-width: 0;
 }
 
-/* Inputs en filtros (date + text) */
+/* Por defecto: columna izquierda */
+.filters-right .filter-group{
+  min-width: 0;
+  grid-column: 1;
+}
+
+/* Columna derecha: Comprador (3º) y Artículo (4º) */
+.filters-right .filter-group:nth-of-type(3){
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.filters-right .filter-group:nth-of-type(4){
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* Fila común de filtros */
+.filter-row {
+    display: grid;
+    grid-template-columns: 100px 180px 100px 180px;
+    gap: 2px 6px;
+    align-items: center;
+}
+
+.filter-row label {
+    text-align: right;
+    padding-right: 4px;
+    line-height: 1;
+}
+
 .filter-row input {
     width: 160px;
     padding: 7px 10px;
@@ -111,17 +134,35 @@ h1 {
     font-size: 13px;
 }
 
-/* Botón */
-.filters-actions {
-    display: flex;
-    justify-content: flex-start; /* o flex-end si lo prefieres */
+/* Botón ocupa todo el ancho */
+.filters-actions{
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
-/* Responsive: apilar en 2 columnas (label + input) */
+.filters-actions button{
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+}
+
+
+/* =========================
+   RESPONSIVE FILTROS
+   ========================= */
 @media (max-width: 900px) {
-    .filters { flex-direction: column; }
-    .filters-right { min-width: 0; width: 100%; }
-    .fam-list { width: 100%; }
+    .filters {
+        flex-direction: column;
+    }
+
+    .fam-list {
+        width: 100%;
+    }
+
+    .filters-right {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
 
     .filter-row {
         grid-template-columns: 70px 1fr;
@@ -131,7 +172,6 @@ h1 {
         width: 100%;
     }
 }
-
 
 
 /* =========================
@@ -155,7 +195,6 @@ h1 {
     background: #fff;
 }
 
-/* Bloques internos reutilizables (cabecera, cuerpo, pie) */
 .block {
     border: 1px solid #e6e6e6;
     border-radius: 10px;
@@ -169,7 +208,7 @@ h1 {
 
 
 /* =========================
-   CABECERA DE TARJETA
+   CABECERA TARJETA
    ========================= */
 .header-row {
     display: grid;
@@ -196,7 +235,7 @@ h1 {
 
 
 /* =========================
-   CUERPO: FOTO | ZV | TABLA
+   CUERPO TARJETA
    ========================= */
 .body-row {
     display: grid;
@@ -207,14 +246,12 @@ h1 {
 
 .thumb {
     width: 250px;
-    height: 100%;
     border: 1px solid #eee;
     border-radius: 8px;
     background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
 }
 
 .thumb img {
@@ -225,7 +262,7 @@ h1 {
 
 
 /* =========================
-   ZONA ZV
+   KV / ZV
    ========================= */
 .kv-grid {
     display: grid;
@@ -243,7 +280,6 @@ h1 {
 .kv .k {
     color: #666;
     font-weight: 600;
-    white-space: nowrap;
 }
 
 .kv .v {
@@ -252,17 +288,8 @@ h1 {
     white-space: nowrap;
 }
 
-.kv-multi {
-    align-items: flex-start;
-}
-
 .kv-multi .v {
-    text-align: right;
     line-height: 1.8;
-}
-
-.kv-multi .v div {
-    white-space: nowrap;
 }
 
 
@@ -273,7 +300,6 @@ h1 {
     font-weight: 700;
     font-size: 12.5px;
     margin: 0 0 6px 0;
-    color: #333;
     text-align: center;
 }
 
@@ -283,33 +309,19 @@ h1 {
     font-size: 11px;
 }
 
+.m12 th,
+.m12 td {
+    border: 1px solid #e0e0e0;
+    padding: 3px 5px;
+}
+
 .m12 th {
     background: #f5f5f5;
-    font-weight: 700;
-    text-align: center;
-    padding: 3px 5px;
-    border: 1px solid #e0e0e0;
-}
-
-.m12 td {
-    padding: 3px 5px;
-    text-align: right;
-    border-left: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
-}
-
-.m12 td:first-child {
-    text-align: center;
-    font-weight: 600;
-}
-
-.m12 tr:last-child td {
-    border-bottom: 1px solid #e0e0e0;
 }
 
 
 /* =========================
-   ACCIONES (checkbox + comentario)
+   ACCIONES
    ========================= */
 .actions {
     display: flex;
@@ -317,20 +329,11 @@ h1 {
     align-items: center;
 }
 
-/* ✅ IMPORTANTE: el flex:1 SOLO para el comentario de tarjeta */
 .actions input[type="text"] {
     flex: 1;
     padding: 7px;
     border: 1px solid #ccc;
     border-radius: 6px;
-}
-
-button {
-    padding: 7px 10px;
-    border: 1px solid #333;
-    background: #fff;
-    border-radius: 6px;
-    cursor: pointer;
 }
 
 

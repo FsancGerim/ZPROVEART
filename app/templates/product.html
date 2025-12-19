@@ -26,48 +26,50 @@
     <!-- DERECHA: filtros agrupados en columna -->
     <div class="filters-right">
 
-        <!-- Fechas -->
-        <div class="filter-title">Fecha</div>
-        <div class="filter-row">
+        <!-- Fecha -->
+        <div class="filter-group">
+            <div class="filter-title">Fecha</div>
+            <div class="filter-row">
             <label class="muted">Desde</label>
             <input type="date" name="from" value="{{ date_from }}">
-
             <label class="muted">Hasta</label>
             <input type="date" name="to" value="{{ date_to }}">
+            </div>
         </div>
 
         <!-- Proveedor -->
-        <div class="filter-title">Proveedor</div>
-        <div class="filter-row">
+        <div class="filter-group">
+            <div class="filter-title">Proveedor</div>
+            <div class="filter-row">
             <label>Desde</label>
-            <input type="text" name="supp_from"
-                inputmode="numeric" pattern="\d{5}" maxlength="5"
-                value="{{ supp_from or '' }}">
-
+            <input type="text" name="supp_from" inputmode="numeric" pattern="\d{5}" maxlength="5"
+                    value="{{ supp_from or '' }}">
             <label>Hasta</label>
-            <input type="text" name="supp_to"
-                inputmode="numeric" pattern="\d{5}" maxlength="5"
-                value="{{ supp_to or '' }}">
+            <input type="text" name="supp_to" inputmode="numeric" pattern="\d{5}" maxlength="5"
+                    value="{{ supp_to or '' }}">
+            </div>
         </div>
 
         <!-- Comprador -->
-        <div class="filter-title">Comprador</div>
-        <div class="filter-row">
+        <div class="filter-group">
+            <div class="filter-title">Comprador</div>
+            <div class="filter-row">
             <label>Desde</label>
             <input type="text" name="comp_from" maxlength="4" value="{{ comp_from or '' }}">
-
             <label>Hasta</label>
             <input type="text" name="comp_to" maxlength="4" value="{{ comp_to or '' }}">
+            </div>
         </div>
 
         <!-- Artículo -->
-         <div class="filter-title">Artículo</div>
-        <div class="filter-row">
+        <div class="filter-group">
+            <div class="filter-title">Artículo</div>
+            <div class="filter-row">
             <label>Desde</label>
             <input type="text" name="art_from" maxlength="13" pattern="\d{13}" value="{{ art_from or '' }}">
-
             <label>Hasta</label>
             <input type="text" name="art_to" maxlength="13" pattern="\d{13}" value="{{ art_to or '' }}">
+            </div>
         </div>
 
         <!-- Botón -->
@@ -76,7 +78,7 @@
             <button type="submit">Aplicar Filtros</button>
         </div>
 
-    </div>
+        </div>
 </form>
 
 <div class="grid">
@@ -229,6 +231,8 @@
         {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
         {%- if comp_from -%}&comp_from={{ comp_from }}{%- endif -%}
         {%- if comp_to -%}&comp_to={{ comp_to }}{%- endif -%}
+        {%- if art_from -%}&art_from={{ art_from }}{%- endif -%}
+        {%- if art_to -%}&art_to={{ art_to }}{%- endif -%}
         ">⬅ Prev</a>
 
     <span class="muted">Página {{ page }} / {{ total_pages }}</span>
@@ -242,6 +246,8 @@
         {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
         {%- if comp_from -%}&comp_from={{ comp_from }}{%- endif -%}
         {%- if comp_to -%}&comp_to={{ comp_to }}{%- endif -%}
+        {%- if art_from -%}&art_from={{ art_from }}{%- endif -%}
+        {%- if art_to -%}&art_to={{ art_to }}{%- endif -%}
         ">Next ➡</a>
 
 </div>
