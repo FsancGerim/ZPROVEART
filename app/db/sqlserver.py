@@ -195,7 +195,7 @@ def get_products(
         base.MED_PZ_0,
         base.MED_CJ_0,
         base.CUBIC_0,
-        BPS.BPSNAM_0,
+        BPS.BPSNAM_0, BPS.ZFRECUPED_0, BPS.ZNUMPALMIN_0, BPS.ZPLAZOENTRE_0, BPS.ZIMPMINPED_0, BPS.ZVOLMINCOM_0,
         Z4.COD_FAM_0, 
         Z4.DES_FAM_0,
         Z4.QTY_PEND_SC_0,

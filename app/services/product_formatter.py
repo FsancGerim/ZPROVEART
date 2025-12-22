@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal, InvalidOperation
 
 
 # =========================
@@ -10,8 +11,24 @@ def _fmt_es(num: float, decimals: int = 0) -> str:
     - miles con '.'
     - decimales con ','
     """
-    s = f"{num:,.{decimals}f}"           # 1,234,567.89
-    return s.replace(",", "X").replace(".", ",").replace("X", ".")  # 1.234.567,89
+    s = f"{num:,.{decimals}f}"
+    return s.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def _to_decimal(v) -> Decimal | None:
+    if v in (None, ""):
+        return None
+    try:
+        return Decimal(str(v).strip())
+    except (InvalidOperation, ValueError):
+        return None
+
+
+def is_zeroish(v) -> bool:
+    d = _to_decimal(v)
+    if d is None:
+        return True
+    return d == 0
 
 
 def fmt_int(v) -> str:
@@ -26,11 +43,29 @@ def fmt_int(v) -> str:
     return _fmt_es(vv, 0)
 
 
+def fmt_int_blank(v) -> str:
+    if is_zeroish(v):
+        return "-"
+    try:
+        return _fmt_es(float(_to_decimal(v)), 0)
+    except Exception:
+        return str(v)
+
+
 def fmt_money(v) -> str:
     if v is None:
         return "-"
     try:
         return _fmt_es(float(v), 2)
+    except Exception:
+        return str(v)
+
+
+def fmt_money_blank(v) -> str:
+    if is_zeroish(v):
+        return "-"
+    try:
+        return _fmt_es(float(_to_decimal(v)), 2)
     except Exception:
         return str(v)
 
@@ -167,6 +202,7 @@ def _attach_eta(products: list[dict], eta_rows: list[dict], max_rows: int = 3) -
 
     return products
 
+
 # =========================
 # LOGÍSTICA
 # =========================
@@ -192,14 +228,41 @@ def _format_logistica(p: dict) -> dict:
 
     return out
 
+
 # =========================
-# VALIDACIÓN ESTADO_0 OK
+# DATOS PROVEEDOR
+# =========================
+def _format_proveedor(p: dict) -> dict:
+    out = dict(p)
+
+    out["ZFRECUPED_0_FMT"] = fmt_int_blank(p.get("ZFRECUPED_0"))
+    out["ZNUMPALMIN_0_FMT"] = fmt_int_blank(p.get("ZNUMPALMIN_0"))
+
+    plazo = p.get("ZPLAZOENTRE_0")
+    out["ZPLAZOENTRE_0_FMT"] = "-" if is_zeroish(plazo) else f"{fmt_int(plazo)} d"
+
+    out["ZIMPMINPED_0_FMT"] = fmt_money_blank(p.get("ZIMPMINPED_0"))
+    out["ZVOLMINCOM_0_FMT"] = fmt_money_blank(p.get("ZVOLMINCOM_0"))
+
+    details = [
+        out["ZFRECUPED_0_FMT"],
+        out["ZNUMPALMIN_0_FMT"],
+        out["ZPLAZOENTRE_0_FMT"],
+        out["ZIMPMINPED_0_FMT"],
+        out["ZVOLMINCOM_0_FMT"],
+    ]
+    out["SUPPLIER_HAS_DETAILS"] = any(x not in ("-", "", None) for x in details)
+
+    return out
+
+
+# =========================
+# VALIDACIÓN ESTADO
 # =========================
 def _format_estado(p: dict) -> dict:
     out = dict(p)
 
     estado = (p.get("ESTADO_0") or "").strip()
-
     out["ESTADO_0_FMT"] = estado or "-"
     out["ESTADO_OK"] = (estado == "OK")
 
@@ -207,6 +270,7 @@ def _format_estado(p: dict) -> dict:
         out["ESTADO_MSG"] = "¡ARTÍCULO NO ACTIVO!"
 
     return out
+
 
 # =========================
 # ENTRYPOINT
@@ -222,6 +286,7 @@ def format_products(
         p2 = _format_condiciones_comerciales(p)
         p2 = _format_existencias(p2)
         p2 = _format_logistica(p2)
+        p2 = _format_proveedor(p2)
         p2 = _format_estado(p2)
         out.append(p2)
 

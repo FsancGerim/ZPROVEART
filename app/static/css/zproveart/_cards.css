@@ -48,18 +48,21 @@
 }
 
 /* =========================
-   CABECERA TARJETA (2 filas)
+   CABECERA TARJETA (3 filas)
+   1) Artículo
+   2) Proveedor + detalles (MISMA LÍNEA)
+   3) Familia | Estado
    ========================= */
 .header-row{
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: 6px 16px;
-  align-items: center;
+  align-items: start;
 }
 
 .header-row > * { min-width: 0; }
 
+/* Base */
 .head-item{
   white-space: nowrap;
   overflow: hidden;
@@ -69,6 +72,9 @@
 .header-row .h1 { font-size: 14px; font-weight: 800; }
 .header-row .h2 { font-size: 13px; color: #444; }
 
+/* =========================
+   FILA 1: ARTÍCULO
+   ========================= */
 .head-art{
   grid-column: 1 / -1;
   white-space: normal;
@@ -77,9 +83,63 @@
   overflow-wrap: anywhere;
 }
 
+/* =========================
+   FILA 2: PROVEEDOR + DETALLES
+   ========================= */
+.head-supplier{
+  grid-column: 1 / -1;
+
+  /* CLAVE: todo en la misma línea */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Texto proveedor */
+.head-supplier .supplier-line{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+}
+
+/* Detalles proveedor */
+.head-supplier .supplier-kv{
+  /* MUY IMPORTANTE: sin margin-top */
+  margin: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+
+  font-size: 12px;
+  color: #444;
+  line-height: 1.2;
+}
+
+.head-supplier .supplier-kv strong{
+  font-weight: 700;
+  color: #555;
+}
+
+/* =========================
+   FILA 3: FAMILIA | ESTADO
+   ========================= */
+.head-family{
+  grid-column: 1 / 2;
+}
+
 .head-status{
+  grid-column: 2 / 3;
   text-align: right;
 }
+
+
 
 /* =========================
    CUERPO TARJETA

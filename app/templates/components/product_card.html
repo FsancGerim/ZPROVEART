@@ -3,18 +3,36 @@
   <!-- CABECERA -->
   <div class="block card-head">
     <div class="header header-row">
+
+      <!-- Fila 1 -->
       <div class="head-item h1 head-art">
         ARTÍCULO: {{ p.ITMREF_0 }} - {{ p.ITMDES_0 }}
       </div>
-      <div class="head-item h2">
-        Proveedor: {{ p.BPSNUM_0 }} - {{ p.BPSNAM_0 }}
+
+      <!-- Fila 2 (proveedor + detalles) -->
+      <div class="head-item h2 head-supplier">
+        <div class="supplier-line">
+          <strong>Proveedor: {{ p.BPSNUM_0 }} - {{ p.BPSNAM_0 }}</strong> 
+        </div>
+
+        <div class="supplier-kv">
+          <span><strong>Frec. pedido:</strong> {{ p.ZFRECUPED_0_FMT }}</span>
+          <span><strong>Palet mín.:</strong> {{ p.ZNUMPALMIN_0_FMT }}</span>
+          <span><strong>Plazo entrega:</strong> {{ p.ZPLAZOENTRE_0_FMT }}</span>
+          <span><strong>Imp. mín.:</strong> {{ p.ZIMPMINPED_0_FMT }}</span>
+          <span><strong>Vol. mín.:</strong> {{ p.ZVOLMINCOM_0_FMT }}</span>
+        </div>
       </div>
-      <div class="head-item h2">
-        Familia: {{ p.COD_FAM_0 }} - {{ p.DES_FAM_0 }}
+
+      <!-- Fila 3 -->
+      <div class="head-item h2 head-family">
+        <strong> {{ p.COD_FAM_0 }} - {{ p.DES_FAM_0 }} </strong>
       </div>
+
       <div class="head-item h1 head-status">
         {{ p.ESTADO_MSG }}
       </div>
+
     </div>
   </div>
 
