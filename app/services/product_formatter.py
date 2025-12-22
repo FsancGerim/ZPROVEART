@@ -193,6 +193,22 @@ def _format_logistica(p: dict) -> dict:
     return out
 
 # =========================
+# VALIDACIÓN ESTADO_0 OK
+# =========================
+def _format_estado(p: dict) -> dict:
+    out = dict(p)
+
+    estado = (p.get("ESTADO_0") or "").strip()
+
+    out["ESTADO_0_FMT"] = estado or "-"
+    out["ESTADO_OK"] = (estado == "OK")
+
+    if not out["ESTADO_OK"]:
+        out["ESTADO_MSG"] = "¡ARTÍCULO NO ACTIVO!"
+
+    return out
+
+# =========================
 # ENTRYPOINT
 # =========================
 def format_products(
@@ -206,6 +222,7 @@ def format_products(
         p2 = _format_condiciones_comerciales(p)
         p2 = _format_existencias(p2)
         p2 = _format_logistica(p2)
+        p2 = _format_estado(p2)
         out.append(p2)
 
     if sales_rows is not None:

@@ -206,7 +206,8 @@ def get_products(
         Z4.ZSLIM_0,
         Z4.CMC_0,
         Z4.ZVERNTV_0,
-        Z4.ZVTASINSTOCK_0
+        Z4.ZVTASINSTOCK_0,
+        Z4.ESTADO_0
     FROM base
     LEFT JOIN BPSUPPLIER AS BPS
         ON base.BPSNUM_0 = BPS.BPSNUM_0
