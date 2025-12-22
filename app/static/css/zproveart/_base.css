@@ -1,0 +1,18 @@
+/* =========================
+   BASE
+   ========================= */
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 24px;
+}
+
+h1 { margin: 0 0 16px 0; }
+
+.muted { color: #666; }
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}

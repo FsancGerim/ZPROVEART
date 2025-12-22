@@ -60,7 +60,7 @@ def zproveart_home(request: Request, page: str = "1", family: list[str] = Query(
 
 
     return templates.TemplateResponse(
-        "product.html",
+        "pages/zproveart.html",
         {
             "request": request,
             "products": products,

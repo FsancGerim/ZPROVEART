@@ -1,0 +1,65 @@
+<form class="filters block" method="get" action="/zproveart">
+
+  <!-- IZQUIERDA: familias -->
+  <div class="fam-list">
+  {% for f in families %}
+    <label class="fam-item">
+      <input type="checkbox" name="family" value="{{ f.COD_FAM_0|string }}"
+        {% if (f.COD_FAM_0|string) in family_list %}checked{% endif %}>
+      <span class="fam-text">{{ f.COD_FAM_0 }} - {{ f.DES_FAM_0 }}</span>
+    </label>
+  {% endfor %}
+  </div>
+
+  <!-- DERECHA: filtros -->
+  <div class="filters-right">
+
+    <div class="filter-group">
+      <div class="filter-title">Fecha</div>
+      <div class="filter-row">
+        <label class="muted">Desde</label>
+        <input type="date" name="from" value="{{ date_from }}">
+        <label class="muted">Hasta</label>
+        <input type="date" name="to" value="{{ date_to }}">
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-title">Proveedor</div>
+      <div class="filter-row">
+        <label>Desde</label>
+        <input type="text" name="supp_from" inputmode="numeric" pattern="\d{5}" maxlength="5"
+               value="{{ supp_from or '' }}">
+        <label>Hasta</label>
+        <input type="text" name="supp_to" inputmode="numeric" pattern="\d{5}" maxlength="5"
+               value="{{ supp_to or '' }}">
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-title">Comprador</div>
+      <div class="filter-row">
+        <label>Desde</label>
+        <input type="text" name="comp_from" maxlength="4" value="{{ comp_from or '' }}">
+        <label>Hasta</label>
+        <input type="text" name="comp_to" maxlength="4" value="{{ comp_to or '' }}">
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-title">Artículo</div>
+      <div class="filter-row">
+        <label>Desde</label>
+        <input type="text" name="art_from" maxlength="13" pattern="\d{13}" value="{{ art_from or '' }}">
+        <label>Hasta</label>
+        <input type="text" name="art_to" maxlength="13" pattern="\d{13}" value="{{ art_to or '' }}">
+      </div>
+    </div>
+
+    <div class="filters-actions">
+      <input type="hidden" name="page" value="1">
+      <button class="btn btn-secondary" type="submit">Aplicar Filtros</button>
+    </div>
+
+  </div>
+</form>

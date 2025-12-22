@@ -1,0 +1,24 @@
+/* =========================
+   TÍTULO CON LOGO
+   ========================= */
+.page-title{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.page-logo{
+  height: 52px;
+  width: auto;
+}
+
+.page-title h1{
+  margin: 0;
+  text-align: center;
+  font-size: 28px;
+}
+
+.page-title-spacer{
+  width: 52px;
+}

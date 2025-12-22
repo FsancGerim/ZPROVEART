@@ -1,0 +1,139 @@
+<div class="card {% if not p.ESTADO_OK %}card-danger{% endif %}">
+
+  <!-- CABECERA -->
+  <div class="block card-head">
+    <div class="header header-row">
+      <div class="head-item h1 head-art">
+        ARTÍCULO: {{ p.ITMREF_0 }} - {{ p.ITMDES_0 }}
+      </div>
+      <div class="head-item h2">
+        Proveedor: {{ p.BPSNUM_0 }} - {{ p.BPSNAM_0 }}
+      </div>
+      <div class="head-item h2">
+        Familia: {{ p.COD_FAM_0 }} - {{ p.DES_FAM_0 }}
+      </div>
+      <div class="head-item h1 head-status">
+        {{ p.ESTADO_MSG }}
+      </div>
+    </div>
+  </div>
+
+  <!-- CUERPO -->
+  <div class="block card-body">
+    <div class="body-row">
+
+      <!-- Foto -->
+      <div class="thumb">
+        {% if p.URL_0 %}
+          <img
+            src="{{ p.URL_0 }}"
+            alt="Imagen producto"
+            onerror="
+              if (!this.dataset.ch) {
+                this.dataset.ch = '1';
+                this.src = this.src.replace(/\.jpg$/i, '_ch.jpg');
+              } else {
+                this.style.display = 'none';
+              }
+            ">
+        {% else %}
+          <span class="muted">Sin imagen</span>
+        {% endif %}
+      </div>
+
+      <!-- ZV -->
+      <div class="block body-zv">
+        <div class="kv-grid">
+          <div class="kv"><div class="k">F. últ. compra</div><div class="v">{{ p.FUC_0_FMT }}</div></div>
+          <div class="kv"><div class="k">UQTY</div><div class="v">{{ p.UQTY_0 }}</div></div>
+          <div class="kv"><div class="k">FOB</div><div class="v">{{ p.FOB_0_FMT }}</div></div>
+
+          <div class="kv"><div class="k">P. Unidad</div><div class="v">{{ p.PUE_0_FMT }}</div></div>
+          <div class="kv"><div class="k">PVP</div><div class="v">{{ p.PVPT4_0_FMT }}</div></div>
+          <div class="kv"><div class="k">DTO</div><div class="v">{{ p.DTO_0_FMT }}</div></div>
+
+          <div class="kv"><div class="k">DIF</div><div class="v">{{ p.DIF_0_FMT }}</div></div>
+          <div class="kv"><div class="k">Arancel</div><div class="v">{{ p.ARANCEL_0_FMT }}</div></div>
+        </div>
+      </div>
+
+      <!-- ZV2 -->
+      <div class="block body-zv body-zv2">
+        <div class="kv-grid">
+          <div class="kv"><div class="k">EXIST. ACTUALES</div><div class="v">{{ p.EX_ACT_0_FMT }}</div></div>
+          <div class="kv"><div class="k">EXIST. DISPONIBLES</div><div class="v">{{ p.EX_DISP_0_FMT }}</div></div>
+          <div class="kv"><div class="k">EXIST. EN SC</div><div class="v">{{ p.QTY_PEND_SC_0_FMT }}</div></div>
+          <div class="kv"><div class="k">EXIST. PREV. ENTRAR.</div><div class="v">{{ p.EX_PREV_0_FMT }}</div></div>
+
+          <div class="kv kv-multi">
+            <div class="k">F. PREVISTA LLEGADA</div>
+            <div class="v">
+              {% if p.eta and p.eta|length > 0 %}
+                {% for r in p.eta %}
+                  <div>{{ r.fecha }} - {{ r.qty }} - {{ r.vcr }}</div>
+                {% endfor %}
+                {% if p.eta_extra and p.eta_extra > 0 %}
+                  <div class="muted">+{{ p.eta_extra }} más…</div>
+                {% endif %}
+              {% else %}
+                -
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ZV3 -->
+      <div class="block body-zv body-zv3">
+        <div class="kv-grid">
+          <div class="kv kv-wrap"><div class="k">Cod. art. prov.</div><div class="v">{{ p.COD_ART_PRO_0_FMT }}</div></div>
+          <div class="kv kv-wrap"><div class="k">Med. pieza</div><div class="v">{{ p.MED_PZ_0_FMT }}</div></div>
+          <div class="kv kv-wrap"><div class="k">Med. caja</div><div class="v">{{ p.MED_CJ_0_FMT }}</div></div>
+          <div class="kv"><div class="k">Cubicaje</div><div class="v">{{ p.CUBIC_0_FMT }}</div></div>
+
+          <div class="kv"><div class="k">Unid./Caja</div><div class="v">{{ p.UNXCAJ_0_FMT }}</div></div>
+          <div class="kv"><div class="k">Unid./Palet</div><div class="v">{{ p.UNXPAL_0_FMT }}</div></div>
+          <div class="kv"><div class="k">Unid./Paquete</div><div class="v">{{ p.UNXPAQ_0_FMT }}</div></div>
+
+          <div class="kv"><div class="k">Puerto</div><div class="v">{{ p.ZPUERTO_0_FMT }}</div></div>
+          <div class="kv"><div class="k">Slim</div><div class="v">{{ p.ZSLIM_0_FMT }}</div></div>
+          <div class="kv"><div class="k">CMC</div><div class="v">{{ p.CMC_0_FMT }}</div></div>
+
+          <div class="kv"><div class="k">Venta NTV</div><div class="v">{{ p.ZVERNTV_0_FMT }}</div></div>
+          <div class="kv"><div class="k">Venta sin stock</div><div class="v">{{ p.ZVTASINSTOCK_0_FMT }}</div></div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="block body-table">
+        <div class="m12-title">Ventas / Compras últimos 12 meses</div>
+        <table class="m12">
+          <tr>
+            <th>Mes</th>
+            <th>Ventas</th>
+            <th>Compras</th>
+          </tr>
+          {% for r in p.m12 %}
+          <tr>
+            <td>{{ r.label }}</td>
+            <td>{{ r.ventas }}</td>
+            <td>{{ r.compras }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PIE -->
+  <div class="block card-foot">
+    <form class="actions js-send" method="post" action="/zproveart/submit">
+      <input type="hidden" name="itmref" value="{{ p.ITMREF_0 }}">
+      <label><input type="checkbox" name="selected" value="1"> Sel</label>
+      <input type="text" name="comment" placeholder="Comentario...">
+      <button class="btn btn-secondary" type="submit">Enviar</button>
+    </form>
+  </div>
+
+</div>

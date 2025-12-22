@@ -1,0 +1,90 @@
+/* =========================
+   BOTONES (COMPONENTE)
+   ========================= */
+
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  background: #fff;
+  color: #111;
+
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Variantes */
+.btn-primary{
+  background: #1f2937;
+  color: #fff;
+  border-color: #111;
+}
+.btn-primary:hover{
+  background: #000;
+}
+
+.btn-secondary{
+  background: #fff;
+  color: #111;
+  border-color: #ccc;
+}
+.btn-secondary:hover{
+  background: #f5f5f5;
+}
+
+.btn-danger{
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+.btn-danger:hover{
+  background: #b91c1c;
+}
+
+/* Estados */
+.btn:disabled,
+.btn.disabled{
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.btn:focus-visible{
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.btn-secondary{
+  box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.btn-secondary:active{
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+.btn{
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 80ms ease;
+}
+
+.btn:active{
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Tamaños */
+.btn-sm{ padding: 5px 8px; font-size: 12px; }
+.btn-lg{ padding: 9px 16px; font-size: 14px; }

@@ -1,0 +1,29 @@
+<div class="pager">
+  <a class="btn btn-secondary {% if page <= 1 %}disabled{% endif %}"
+     href="/zproveart?page={{ page - 1 }}&page_size={{ page_size }}
+     {%- for fc in family_list -%}&family={{ fc|urlencode }}{%- endfor -%}
+     {%- if date_from -%}&from={{ date_from }}{%- endif -%}
+     {%- if date_to -%}&to={{ date_to }}{%- endif -%}
+     {%- if supp_from -%}&supp_from={{ supp_from }}{%- endif -%}
+     {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
+     {%- if comp_from -%}&comp_from={{ comp_from }}{%- endif -%}
+     {%- if comp_to -%}&comp_to={{ comp_to }}{%- endif -%}
+     {%- if art_from -%}&art_from={{ art_from }}{%- endif -%}
+     {%- if art_to -%}&art_to={{ art_to }}{%- endif -%}
+     ">⬅ Prev</a>
+
+  <span class="muted">Página {{ page }} / {{ total_pages }}</span>
+
+  <a class="btn btn-secondary {% if page >= total_pages %}disabled{% endif %}"
+     href="/zproveart?page={{ page + 1 }}&page_size={{ page_size }}
+     {%- for fc in family_list -%}&family={{ fc|urlencode }}{%- endfor -%}
+     {%- if date_from -%}&from={{ date_from }}{%- endif -%}
+     {%- if date_to -%}&to={{ date_to }}{%- endif -%}
+     {%- if supp_from -%}&supp_from={{ supp_from }}{%- endif -%}
+     {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
+     {%- if comp_from -%}&comp_from={{ comp_from }}{%- endif -%}
+     {%- if comp_to -%}&comp_to={{ comp_to }}{%- endif -%}
+     {%- if art_from -%}&art_from={{ art_from }}{%- endif -%}
+     {%- if art_to -%}&art_to={{ art_to }}{%- endif -%}
+     ">Next ➡</a>
+</div>

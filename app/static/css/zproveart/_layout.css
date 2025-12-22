@@ -1,0 +1,15 @@
+/* =========================
+   LAYOUT GENERAL
+   ========================= */
+.page{
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 8px;
+}
+
+.filters.block,
+.grid,
+.pager{
+  width: 100%;
+}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}ZPROVEART{% endblock %}
+
+{% block body %}
+<div class="page">
+
+  {% include "partials/page_title.html" %}
+
+  {% include "partials/filters.html" %}
+
+  <div class="grid">
+    {% for p in products %}
+      {% include "components/product_card.html" %}
+    {% endfor %}
+  </div>
+
+  {% include "partials/pager.html" %}
+
+</div>
+{% endblock %}

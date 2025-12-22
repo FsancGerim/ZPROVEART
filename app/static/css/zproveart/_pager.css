@@ -1,0 +1,9 @@
+/* =========================
+   PAGINADOR
+   ========================= */
+.pager {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
