@@ -255,6 +255,23 @@ def _format_proveedor(p: dict) -> dict:
 
     return out
 
+# =========================
+# COMPRA VENTA
+# =========================
+def _format_compven(p: dict) -> dict:
+    out = dict(p)
+
+    # Números: quitar decimales, mantener ceros
+    out["NUM_CLIENTES_FMT"]  = fmt_int(out.get("NUM_CLIENTES_0"))
+    out["NUM_ENTRADAS_FMT"]  = fmt_int(out.get("NUM_ENTRADAS_0"))
+    out["NUM_VENTAS_FMT"]    = fmt_int(out.get("NUM_VENTAS_0"))
+    out["NUM_OCU_FMT"]       = fmt_int(out.get("NUM_OCU_0"))
+
+    # COD_COM_0: texto
+    cod_com = out.get("COD_COM_0")
+    out["COD_COM_FMT"] = (str(cod_com).strip() if cod_com not in (None, "") else "-")
+
+    return out
 
 # =========================
 # VALIDACIÓN ESTADO
@@ -287,6 +304,7 @@ def format_products(
         p2 = _format_existencias(p2)
         p2 = _format_logistica(p2)
         p2 = _format_proveedor(p2)
+        p2 = _format_compven(p2)
         p2 = _format_estado(p2)
         out.append(p2)
 

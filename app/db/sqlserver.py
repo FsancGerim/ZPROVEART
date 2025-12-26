@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from datetime import date
 import pyodbc
@@ -99,6 +101,7 @@ def count_products(
         return int(cur.fetchone()[0])
 
 
+
 def get_products(
     page: int,
     page_size: int,
@@ -110,8 +113,17 @@ def get_products(
     comp_from: Optional[str] = None,
     comp_to: Optional[str] = None,
     art_from: Optional[str] = None,
-    art_to: Optional[str] = None
+    art_to: Optional[str] = None,
+    year: int = 2025,  # <-- año para ZTCOMVEN
 ) -> list[dict]:
+    """
+    Listado paginado desde ZTPROVEART (base), con joins de datos auxiliares.
+    ZTCOMVEN se une filtrando por año EN EL ON (para no romper paginación).
+    """
+
+    # Sanitizado mínimo (por si acaso)
+    page = max(1, int(page or 1))
+    page_size = max(1, min(int(page_size or 25), 200))
 
     fams = [f.strip() for f in (families or []) if f and f.strip()]
 
@@ -125,12 +137,21 @@ def get_products(
             ZTP.ITMDES_0,
             ZTP.BPSNUM_0,
             ZTP.FUC_0,
-            ZTP.UQTY_0, ZTP.FOB_0, ZTP.PUE_0, ZTP.PVPT4_0, ZTP.DTO_0, ZTP.DIF_0, ZTP.ARANCEL_0,
-            ZTP.EX_ACT_0, ZTP.EX_DISP_0, ZTP.EX_PREV_0,
+            ZTP.UQTY_0,
+            ZTP.FOB_0,
+            ZTP.PUE_0,
+            ZTP.PVPT4_0,
+            ZTP.DTO_0,
+            ZTP.DIF_0,
+            ZTP.ARANCEL_0,
+            ZTP.EX_ACT_0,
+            ZTP.EX_DISP_0,
+            ZTP.EX_PREV_0,
             ZTP.COD_ART_PRO_0,
             ZTP.MED_PZ_0,
             ZTP.MED_CJ_0,
-            ZTP.CUBIC_0
+            ZTP.CUBIC_0,
+            ZTP.COD_COM_0
         FROM ZTPROVEART AS ZTP
         WHERE ZTP.BPSNUM_0 IS NOT NULL
           AND ZTP.BPSNUM_0 <> ''
@@ -138,7 +159,7 @@ def get_products(
 
     params: list = [page, page_size]
 
-    
+    # Filtros
     if art_from:
         sql += " AND ZTP.ITMREF_0 >= ?\n"
         params.append(art_from)
@@ -180,23 +201,42 @@ def get_products(
         sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)\n"
         params.append(date_to)
 
+    # Cierre CTE + paginación
     sql += """
         ORDER BY ZTP.FUC_0 DESC, ZTP.ITMREF_0 DESC
         OFFSET (@Page - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
     )
     SELECT
-        base.ITMREF_0, base.ITMDES_0, base.BPSNUM_0,
+        base.ITMREF_0,
+        base.ITMDES_0,
+        base.BPSNUM_0,
         ZURL.URL_0,
         base.FUC_0,
-        base.UQTY_0, base.FOB_0, base.PUE_0, base.PVPT4_0, base.DTO_0, base.DIF_0, base.ARANCEL_0,
-        base.EX_ACT_0, base.EX_DISP_0, base.EX_PREV_0,
+        base.UQTY_0,
+        base.FOB_0,
+        base.PUE_0,
+        base.PVPT4_0,
+        base.DTO_0,
+        base.DIF_0,
+        base.ARANCEL_0,
+        base.EX_ACT_0,
+        base.EX_DISP_0,
+        base.EX_PREV_0,
         base.COD_ART_PRO_0,
         base.MED_PZ_0,
         base.MED_CJ_0,
         base.CUBIC_0,
-        BPS.BPSNAM_0, BPS.ZFRECUPED_0, BPS.ZNUMPALMIN_0, BPS.ZPLAZOENTRE_0, BPS.ZIMPMINPED_0, BPS.ZVOLMINCOM_0,
-        Z4.COD_FAM_0, 
+        base.COD_COM_0,
+
+        BPS.BPSNAM_0,
+        BPS.ZFRECUPED_0,
+        BPS.ZNUMPALMIN_0,
+        BPS.ZPLAZOENTRE_0,
+        BPS.ZIMPMINPED_0,
+        BPS.ZVOLMINCOM_0,
+
+        Z4.COD_FAM_0,
         Z4.DES_FAM_0,
         Z4.QTY_PEND_SC_0,
         Z4.UNXCAJ_0,
@@ -207,7 +247,13 @@ def get_products(
         Z4.CMC_0,
         Z4.ZVERNTV_0,
         Z4.ZVTASINSTOCK_0,
-        Z4.ESTADO_0
+        Z4.ESTADO_0,
+
+        ZTCV.NUM_CLIENTES_0,
+        ZTCV.NUM_ENTRADAS_0,
+        ZTCV.NUM_VENTAS_0,
+        ZTCV.NUM_OCU_0
+
     FROM base
     LEFT JOIN BPSUPPLIER AS BPS
         ON base.BPSNUM_0 = BPS.BPSNUM_0
@@ -215,14 +261,20 @@ def get_products(
         ON base.ITMREF_0 = ZURL.ITMREF_0
     LEFT JOIN ZPROART4 AS Z4
         ON base.ITMREF_0 = Z4.ITMREF_0
+    LEFT JOIN ZTCOMVEN AS ZTCV
+        ON base.ITMREF_0 = ZTCV.ITMREF_0
+       AND ZTCV.ANNO_0 = ?
     ORDER BY base.FUC_0 DESC, base.ITMREF_0 DESC;
     """
+
+    params.append(year)
 
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute(sql, params)
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
+
 
 def get_sales_12m(itmrefs: list[str]) -> list[dict]:
     if not itmrefs:

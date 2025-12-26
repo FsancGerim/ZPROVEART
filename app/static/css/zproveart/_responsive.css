@@ -31,16 +31,19 @@
 }
 
 /* Tablet: reducir anchos mínimos */
-@media (max-width: 1200px){
+@media (max-width: 1500px){
   .body-row{
     grid-template-columns:
-      minmax(150px, 220px)
-      minmax(170px, 1fr)
-      minmax(170px, 1fr)
-      minmax(170px, 1fr)
-      minmax(220px, 280px);
-    gap: 10px;
+      minmax(140px, 210px) /* foto */
+      minmax(180px, 1fr)   /* ZV */
+      minmax(150px, 1fr)   /* ZV2 */
+      minmax(175px, 1fr)   /* ZV3 */
+      minmax(120px, 1fr)   /* Actividad */
+      minmax(120px, 280px) /* tabla */
+    ;
+    gap: 8px;
   }
+
   .kv{ grid-template-columns: 95px minmax(0, 1fr); }
   .kv-grid{ font-size: 12px; }
 }
