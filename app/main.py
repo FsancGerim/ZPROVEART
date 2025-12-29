@@ -7,12 +7,14 @@ from app.services.product_formatter import format_products
 from app.services.filters import parse_date
 from app.services.excel_exporter import ExcelExporter, append_row_daily
 from app.config import EXPORT_DIR
+from app.routes import fotos
 import math
 
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+app.include_router(fotos.router)
 
 exporter = ExcelExporter(EXPORT_DIR)
 

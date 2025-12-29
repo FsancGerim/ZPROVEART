@@ -44,12 +44,12 @@
       <div class="thumb">
         {% if p.URL_0 %}
           <img
-            src="{{ p.URL_0 }}"
+            src="/foto?u={{ p.URL_0 | urlencode }}"
             alt="Imagen producto"
             onerror="
               if (!this.dataset.ch) {
                 this.dataset.ch = '1';
-                this.src = this.src.replace(/\.jpg$/i, '_ch.jpg');
+                this.src = this.src.replace(/\.jpg(%|$)/i, '_ch.jpg$1');
               } else {
                 this.style.display = 'none';
               }
