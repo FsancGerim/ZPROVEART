@@ -19,7 +19,7 @@ body {
 .grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: 5px;
   width: 100%;
 }
 
@@ -31,7 +31,7 @@ body {
   max-width: 100%;
   border: 1px solid #ddd;
   border-radius: 10px;
-  padding: 12px;
+  padding: 5px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   background: #fff;
   overflow: hidden;
@@ -41,14 +41,21 @@ body {
   min-width: 0;
   border: 1px solid #e6e6e6;
   border-radius: 10px;
-  padding: 10px;
+  padding: 5px;
   background: #fafafa;
 }
 
-.card-head { margin-bottom: 10px; }
+/* Compactación */
+.card-body.block { padding: 8px; }
+
+.card-head{
+  padding: 6px 10px;      
+  margin-bottom: 5px;    
+}
 .card-body { margin-bottom: 10px; }
 .card-foot { margin: 0; }
 
+/* Estado peligro */
 .card-danger{
   border: 2px solid #dc2626;
   box-shadow: 0 0 0 2px rgba(220,38,38,.15);
@@ -68,8 +75,11 @@ body {
    ========================= */
 .header-row{
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 6px 16px;
+  grid-template-columns:
+    minmax(0, 3fr)
+    minmax(0, 2fr)
+    minmax(0, 1fr);
+  gap: 4px 12px;
   align-items: start;
 }
 
@@ -81,42 +91,58 @@ body {
   text-overflow: ellipsis;
 }
 
-.header-row .h1 { font-size: 14px; font-weight: 800; }
-.header-row .h2 { font-size: 13px; color: #444; }
+.header-row .h1 { font-size: 12.5px; font-weight: 800; line-height: 1.15;}
+.header-row .h2 { font-size: 11.5px; color: #444; line-height: 1.15;}
 
 .head-art{
-  grid-column: 1 / -1;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  grid-column: 1 / 2;
+  grid-row: 1;
 }
 
+.head-family{
+  grid-column: 2 / 3;
+  grid-row: 1;
+  text-align: center;
+}
+
+.head-status{
+  grid-column: 3 / 4;
+  grid-row: 1;
+  text-align: right;
+}
+
+/* ===== FILA 2: proveedor | detalles | acciones (1 sola fila) ===== */
 .head-supplier{
   grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px 16px;
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* proveedor | detalles | botón */
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 0;
   white-space: normal;
 }
 
+/* Proveedor: no se rompe */
 .head-supplier .supplier-line{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
+/* Detalles: 1 sola línea (si no cabe, elipsis) */
 .head-supplier .supplier-kv{
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  font-size: 12px;
+  flex-wrap: nowrap;
+  gap: 4px 10px;
+  font-size: 11px;
   color: #444;
-}
+  line-height: 1.1;
 
-.head-family{ grid-column: 1 / 2; }
-.head-status{
-  grid-column: 2 / 3;
-  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 /* =========================
@@ -125,19 +151,17 @@ body {
 .body-row{
   display: grid;
   grid-template-columns:
-    minmax(0, 260px)   /* FOTO */
-    minmax(0, 1fr)     /* ZV */
-    minmax(0, 1fr)     /* ZV2 */
-    minmax(0, 1fr)     /* ZV3 */
-    minmax(0, 1fr)     /* ZV4 */
-    minmax(0, 220px);  /* TABLA */
-  gap: 12px;
+    minmax(0, 220px)
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 220px);
+  gap: 5px;
   align-items: stretch;
-
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden;   /* BLINDAJE FINAL */
+  overflow: hidden;
+  max-height: 200px;
 }
 
 .body-row > * { min-width: 0; }
@@ -147,8 +171,6 @@ body {
    ========================= */
 .thumb{
   width: 100%;
-  min-width: 0;
-  min-height: 160px;
   border: 1px solid #eee;
   border-radius: 8px;
   background: #fff;
@@ -156,17 +178,17 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  height: 200px;
 }
 
 .thumb img{
-  width: 100%;
-  height: auto;
-  max-height: 220px;
+  width: 90%;
+  height: 90%;
   object-fit: contain;
 }
 
 /* =========================
-   KV
+   KV BASE
    ========================= */
 .kv-grid {
   display: grid;
@@ -177,7 +199,7 @@ body {
 
 .kv {
   display: grid;
-  grid-template-columns: minmax(70px, 80px) minmax(0, 1fr);
+  grid-template-columns: minmax(70px, 50px) minmax(0, 1fr);
   gap: 2px;
 }
 
@@ -192,43 +214,69 @@ body {
   white-space: nowrap;
 }
 
-.kv-multi .v,
-.kv-wrap .v{
+.kv-wrap .v,
+.kv-multi .v{
   white-space: normal;
   overflow-wrap: anywhere;
-  word-break: break-word;
+}
+
+/* Compactos */
+.body-zv:not(.body-zv3) .kv-grid,
+.body-activity .kv-grid{
+  gap: 4px 0;
+}
+
+.body-zv:not(.body-zv3) .kv,
+.body-activity .kv{
+  grid-template-columns: minmax(60px, 70px) minmax(0, 1fr);
+}
+
+.body-zv:not(.body-zv3) .kv .v,
+.body-activity .kv .v{
+  line-height: 1.15;
+}
+
+/* ZV3 en dos columnas */
+.body-zv3 .kv-grid{
+  grid-template-columns: 1fr 1fr;
+  column-gap: 10px;
+  row-gap: 4px;
+}
+
+.body-zv3 .kv-wrap,
+.body-zv3 .kv-multi,
+.body-zv3 .kv-wide{
+  grid-column: 1 / -1;
 }
 
 /* =========================
    TABLA 12 MESES
    ========================= */
 .body-table{
-  min-width: 0;
   width: 100%;
+  height: 200px;
 }
 
 .m12{
   width: 100%;
-  max-width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
-  table-layout: fixed; /* CLAVE */
+  font-size: 9.5px;
+  table-layout: fixed;
 }
 
 .m12-title{
   font-weight: 700;
-  font-size: 11.5px;
-  margin: 0 0 6px 0;
+  font-size: 10.5px;
+  margin-bottom: 4px;
   text-align: center;
 }
 
 .m12 th,
 .m12 td{
-  border: 1px solid #e0e0e0;
-  padding: 1.8px 1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 1px 0;
   white-space: nowrap;
+  line-height: 1.15;
+  text-align: center;
 }
 
 .m12 th{
@@ -236,29 +284,90 @@ body {
 }
 
 .m12 th:nth-child(1),
-.m12 td:nth-child(1) {
-  width: 34px;         /* Mes */
+.m12 td:nth-child(1){
+  width: 34px;
 }
+
 .m12 th:nth-child(2),
 .m12 td:nth-child(2),
 .m12 th:nth-child(3),
-.m12 td:nth-child(3) {
-  width: 34px;         /* Ventas / Compras */
-  text-align: right;
+.m12 td:nth-child(3){
+  width: 34px;
 }
 
 /* =========================
-   ACCIONES
+   ACCIONES (BOTÓN EN CABECERA + PIE REALMENTE COLAPSABLE)
    ========================= */
+
+/* Botón Acciones (cabecera) */
+.actions-toggle{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 11.5px;
+  white-space: nowrap;
+  justify-self: end; /* en la columna derecha del grid de head-supplier */
+}
+
+.actions-toggle .chev{
+  transition: transform .15s ease;
+}
+
+/* Pie cerrado = cero impacto visual */
+.card-foot{
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Form colapsado */
+.card-foot form.actions{
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: max-height .18s ease, opacity .18s ease;
+}
+
+/* Abierto: el pie aparece */
+.card.is-actions-open .card-foot{
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.card.is-actions-open .card-foot form.actions{
+  max-height: 120px; /* sube a 140px si se te parte */
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card.is-actions-open .actions-toggle .chev{
+  transform: rotate(180deg);
+}
+
+/* Layout del form */
 .actions{
   display: flex;
   gap: 8px;
   align-items: center;
+  width: 100%;
 }
 
 .actions input[type="text"]{
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   padding: 7px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  width: 100%;
 }

@@ -9,7 +9,7 @@
         ARTÍCULO: {{ p.ITMREF_0 }} - {{ p.ITMDES_0 }}
       </div>
 
-      <!-- Fila 2 (proveedor + detalles) -->
+      <!-- Fila 2 (proveedor + detalles + acciones a la derecha) -->
       <div class="head-item h2 head-supplier">
         <div class="supplier-line">
           <strong>Proveedor: {{ p.BPSNUM_0 }} - {{ p.BPSNAM_0 }}</strong> 
@@ -22,11 +22,16 @@
           <span><strong>Imp. mín.:</strong> {{ p.ZIMPMINPED_0_FMT }}</span>
           <span><strong>Vol. mín.:</strong> {{ p.ZVOLMINCOM_0_FMT }}</span>
         </div>
+
+        <!-- Botón acciones en cabecera -->
+        <button type="button" class="actions-toggle actions-toggle--head" aria-expanded="false">
+          <span class="chev">▾</span>
+        </button>
       </div>
 
       <!-- Fila 3 -->
       <div class="head-item h2 head-family">
-        <strong> {{ p.COD_FAM_0 }} - {{ p.DES_FAM_0 }} </strong>
+        <strong> FAMILIA: {{ p.COD_FAM_0 }} - {{ p.DES_FAM_0 }} </strong>
       </div>
 
       <div class="head-item h1 head-status">
@@ -62,16 +67,16 @@
       <!-- ZV -->
       <div class="block body-zv">
         <div class="kv-grid">
-          <div class="kv"><div class="k">F. últ. compra</div><div class="v">{{ p.FUC_0_FMT }}</div></div>
-          <div class="kv"><div class="k">UQTY</div><div class="v">{{ p.UQTY_0 }}</div></div>
-          <div class="kv"><div class="k">FOB</div><div class="v">{{ p.FOB_0_FMT }}</div></div>
+          <div class="kv"><div class="k">F.ULT.COMPRA</div><div class="v">{{ p.FUC_0_FMT }}</div></div>
+          <div class="kv"><div class="k">ULT. CANT.</div><div class="v">{{ p.UQTY_0 }}</div></div>
+          <div class="kv"><div class="k">P. F.O.B Neto</div><div class="v">{{ p.FOB_0_FMT }}</div></div>
 
-          <div class="kv"><div class="k">P. Unidad</div><div class="v">{{ p.PUE_0_FMT }}</div></div>
-          <div class="kv"><div class="k">PVP</div><div class="v">{{ p.PVPT4_0_FMT }}</div></div>
-          <div class="kv"><div class="k">DTO</div><div class="v">{{ p.DTO_0_FMT }}</div></div>
+          <div class="kv"><div class="k">U.P.COMPRA</div><div class="v">{{ p.PUE_0_FMT }}</div></div>
+          <div class="kv"><div class="k">PVP T4</div><div class="v">{{ p.PVPT4_0_FMT }}</div></div>
+          <div class="kv"><div class="k">Dto</div><div class="v">{{ p.DTO_0_FMT }}%</div></div>
 
-          <div class="kv"><div class="k">DIF</div><div class="v">{{ p.DIF_0_FMT }}</div></div>
-          <div class="kv"><div class="k">Arancel</div><div class="v">{{ p.ARANCEL_0_FMT }}</div></div>
+          <div class="kv"><div class="k">% DIF. Pdte.</div><div class="v">{{ p.DIF_0_FMT }}</div></div>
+          <div class="kv"><div class="k">% ARANCEL</div><div class="v">{{ p.ARANCEL_0_FMT }}</div></div>
         </div>
       </div>
 
@@ -84,7 +89,7 @@
           <div class="kv"><div class="k">EXIST. PREV. ENTRAR.</div><div class="v">{{ p.EX_PREV_0_FMT }}</div></div>
 
           <div class="kv kv-multi">
-            <div class="k">F. PREVISTA LLEGADA</div>
+            <div class="k">F. PREVISTA DE LLEGADA</div>
             <div class="v">
               {% if p.eta and p.eta|length > 0 %}
                 {% for r in p.eta %}
@@ -104,21 +109,61 @@
       <!-- ZV3 -->
       <div class="block body-zv body-zv3">
         <div class="kv-grid">
-          <div class="kv kv-wrap"><div class="k">Cod. art. prov.</div><div class="v">{{ p.COD_ART_PRO_0_FMT }}</div></div>
-          <div class="kv kv-wrap"><div class="k">Med. pieza</div><div class="v">{{ p.MED_PZ_0_FMT }}</div></div>
-          <div class="kv kv-wrap"><div class="k">Med. caja</div><div class="v">{{ p.MED_CJ_0_FMT }}</div></div>
-          <div class="kv"><div class="k">Cubicaje</div><div class="v">{{ p.CUBIC_0_FMT }}</div></div>
 
-          <div class="kv"><div class="k">Unid./Caja</div><div class="v">{{ p.UNXCAJ_0_FMT }}</div></div>
-          <div class="kv"><div class="k">Unid./Palet</div><div class="v">{{ p.UNXPAL_0_FMT }}</div></div>
-          <div class="kv"><div class="k">Unid./Paquete</div><div class="v">{{ p.UNXPAQ_0_FMT }}</div></div>
+          <div class="kv kv-wrap">
+            <div class="k">COD.ART.PROV</div>
+            <div class="v">{{ p.COD_ART_PRO_0_FMT }}</div>
+          </div>
 
-          <div class="kv"><div class="k">Puerto</div><div class="v">{{ p.ZPUERTO_0_FMT }}</div></div>
-          <div class="kv"><div class="k">Slim</div><div class="v">{{ p.ZSLIM_0_FMT }}</div></div>
-          <div class="kv"><div class="k">CMC</div><div class="v">{{ p.CMC_0_FMT }}</div></div>
+          <div class="kv kv-wrap">
+            <div class="k">MEDIDAS Pz</div>
+            <div class="v">{{ p.MED_PZ_0_FMT }}</div>
+          </div>
 
-          <div class="kv"><div class="k">Venta NTV</div><div class="v">{{ p.ZVERNTV_0_FMT }}</div></div>
-          <div class="kv"><div class="k">Venta sin stock</div><div class="v">{{ p.ZVTASINSTOCK_0_FMT }}</div></div>
+          <div class="kv kv-wrap">
+            <div class="k">MED. CAJA</div>
+            <div class="v">{{ p.MED_CJ_0_FMT }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Cubicaje</div>
+            <div class="v">{{ p.CUBIC_0_FMT }}</div>
+          </div>
+
+          <div class="kv kv-wide">
+            <div class="k">UNx</div>
+            <div class="v units-row">
+              <span><strong>CAJ: </strong>{{ p.UNXCAJ_0_FMT }}</span>
+              <span><strong>PAL: </strong>{{ p.UNXPAL_0_FMT }}</span>
+              <span><strong>PAQ: </strong>{{ p.UNXPAQ_0_FMT }}</span>
+            </div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Puerto</div>
+            <div class="v">{{ p.ZPUERTO_0_FMT }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Slim</div>
+            <div class="v">{{ p.ZSLIM_0_FMT }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">CMC</div>
+            <div class="v">{{ p.CMC_0_FMT }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Venta NTV</div>
+            <div class="v">{{ p.ZVERNTV_0_FMT }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Venta sin stock</div>
+            <div class="v">{{ p.ZVTASINSTOCK_0_FMT }}</div>
+          </div>
+
         </div>
       </div>
 
@@ -127,27 +172,27 @@
         <div class="kv-grid kv-activity">
 
           <div class="kv">
-            <div class="k">Clientes</div>
-            <div class="v">{{ p.NUM_CLIENTES_FMT }}</div>
-          </div>
-
-          <div class="kv">
-            <div class="k">Ventas</div>
+            <div class="k">Nº VENTAS</div>
             <div class="v">{{ p.NUM_VENTAS_FMT }}</div>
           </div>
 
           <div class="kv">
-            <div class="k">Ocurrencias</div>
+            <div class="k">Nº ENTRADAS</div>
+            <div class="v">{{ p.NUM_ENTRADAS_FMT }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Nº OCURRENCIAS</div>
             <div class="v">{{ p.NUM_OCU_FMT }}</div>
           </div>
 
           <div class="kv">
-            <div class="k">Entradas</div>
-            <div class="v">{{ p.NUM_ENTRADAS_FMT }}</div>
+            <div class="k">Nº CLIENTES</div>
+            <div class="v">{{ p.NUM_CLIENTES_FMT }}</div>
           </div>
 
           <div class="kv kv-wrap">
-            <div class="k">Código compra</div>
+            <div class="k">COD. COMPRADOR</div>
             <div class="v">{{ p.COD_COM_0 }}</div>
           </div>
 
@@ -176,7 +221,7 @@
     </div>
   </div>
 
-  <!-- PIE -->
+  <!-- PIE (sin botón, solo el form) -->
   <div class="block card-foot">
     <form class="actions js-send" method="post" action="/zproveart/submit">
       <input type="hidden" name="itmref" value="{{ p.ITMREF_0 }}">
