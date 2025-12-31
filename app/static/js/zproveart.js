@@ -56,3 +56,20 @@ document.addEventListener("click", function (e) {
   const isOpen = card.classList.toggle("is-actions-open");
   toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
 });
+
+// =========================
+// Toggle panel de filtros (cabecera)
+// =========================
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest(".js-filters-toggle");
+  if (!btn) return;
+
+  const page = btn.closest(".page");
+  if (!page) return;
+
+  const isOpen = page.classList.toggle("is-filters-open");
+
+  // Accesibilidad (esto SÍ se queda)
+  btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  btn.setAttribute("aria-label", isOpen ? "Ocultar filtros" : "Mostrar filtros");
+});

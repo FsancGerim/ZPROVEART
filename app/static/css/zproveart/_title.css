@@ -5,20 +5,27 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  margin-top: 2px;
 }
 
 .page-logo{
-  height: 52px;
+  height: 40px;
   width: auto;
 }
 
 .page-title h1{
   margin: 0;
   text-align: center;
-  font-size: 28px;
+  font-size: 22px;
+  line-height: 1.1;
 }
 
-.page-title-spacer{
-  width: 52px;
+.page-filters-toggle{
+  justify-self: end;      
+  white-space: nowrap;
+}
+
+.page.is-filters-open .page-filters-toggle .chev{
+  transform: rotate(180deg);
 }

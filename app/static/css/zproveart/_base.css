@@ -16,3 +16,22 @@ h1 { margin: 0 0 16px 0; }
   pointer-events: none;
   opacity: 0.4;
 }
+
+/* =========================
+   ZPROVEART: espacio para paginador lateral
+   ========================= */
+
+/* En esta pantalla dejamos un "canal" a izquierda y derecha
+   para que las bandas laterales no tapen contenido */
+.page.page-gallery{
+  padding-left: 80px;   /* debe ser >= width side-pager + margen */
+  padding-right: 80px;
+}
+
+/* En móvil reducimos el canal */
+@media (max-width: 768px){
+  .page.page-gallery{
+    padding-left: 60px;
+    padding-right: 60px;
+  }
+}

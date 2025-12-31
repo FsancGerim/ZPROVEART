@@ -3,16 +3,20 @@
 {% block title %}ZPROVEART{% endblock %}
 
 {% block body %}
-<div class="page">
+<div class="page page-gallery">
 
   {% include "partials/page_title.html" %}
 
-  {% include "partials/filters.html" %}
+  <div id="filtersPanel" class="filters-panel">
+    {% include "partials/filters.html" %}
+  </div>
 
-  <div class="grid">
-    {% for p in products %}
-      {% include "components/product_card.html" %}
-    {% endfor %}
+  <div class="zproveart-content">
+    <div class="grid">
+      {% for p in products %}
+        {% include "components/product_card.html" %}
+      {% endfor %}
+    </div>
   </div>
 
   {% include "partials/pager.html" %}

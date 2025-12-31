@@ -1,9 +1,80 @@
 /* =========================
-   PAGINADOR
+   PAGINADOR LATERAL (estilo botón)
    ========================= */
-.pager {
-  margin-top: 16px;
+
+.side-pager{
+  position: fixed;
+  top: 8px;
+  bottom: 8px;
+  width: 64px;
+
   display: flex;
-  gap: 8px;
   align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+  z-index: 9999;
+
+  /* Estilo botón */
+  background: #fff;
+  color: #111;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 1px 1px rgba(0,0,0,.04);
+
+  user-select: none;
+  cursor: pointer;
+
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 80ms ease;
+}
+
+.side-pager.left{ left: 8px; }
+.side-pager.right{ right: 8px; }
+
+/* Flecha */
+.side-pager .arrow{
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Hover */
+.side-pager:hover{
+  background: #f5f5f5;
+  border-color: #bbb;
+}
+
+/* Active */
+.side-pager:active{
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+/* Disabled */
+.side-pager.disabled{
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Indicador */
+.page-indicator{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  z-index: 9999;
+
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+
+  box-shadow: 0 1px 1px rgba(0,0,0,.04);
 }

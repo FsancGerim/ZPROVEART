@@ -206,3 +206,14 @@ input[type="date"]{
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================
+   TOGGLE: esconder / mostrar filtros
+   ========================= */
+.filters-panel{
+  display: none;
+}
+
+.page.is-filters-open .filters-panel{
+  display: block;
+}

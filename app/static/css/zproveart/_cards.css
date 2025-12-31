@@ -50,9 +50,9 @@ body {
 
 .card-head{
   padding: 6px 10px;      
-  margin-bottom: 5px;    
+  margin-bottom: 2px;    
 }
-.card-body { margin-bottom: 10px; }
+.card-body { margin-bottom: 0px; }
 .card-foot { margin: 0; }
 
 /* Estado peligro */
@@ -79,7 +79,7 @@ body {
     minmax(0, 3fr)
     minmax(0, 2fr)
     minmax(0, 1fr);
-  gap: 4px 12px;
+  gap: 2px 12px;
   align-items: start;
 }
 
@@ -157,7 +157,7 @@ body {
     minmax(0, 1fr)
     minmax(0, 1fr)
     minmax(0, 220px);
-  gap: 5px;
+  gap: 2px;
   align-items: stretch;
   width: 100%;
   overflow: hidden;

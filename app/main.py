@@ -46,7 +46,7 @@ def zproveart_home(request: Request, page: str = "1", family: list[str] = Query(
     art_to = request.query_params.get("art_to")
 
     family_list = [str(f).strip() for f in family if f and str(f).strip()]
-    PAGE_SIZE = 6
+    PAGE_SIZE = 3
     total = count_products(family_list, date_from, date_to, supp_from, supp_to, comp_from, comp_to, art_from, art_to)
     total_pages = max(1, math.ceil(total / PAGE_SIZE))
     page = max(1, min(page, total_pages))

@@ -1,11 +1,19 @@
 <div class="page-title">
+    <!-- Izquierda: logo -->
     <a href="/zproveart" class="page-logo-link" aria-label="Volver a inicio">
-    <img src="{{ url_for('static', path='images/Gerimport.jpg') }}"
-        alt="Logo Gerimport"
-        class="page-logo">
+      <img src="{{ url_for('static', path='images/Gerimport.jpg') }}"
+           alt="Logo Gerimport"
+           class="page-logo">
     </a>
 
+    <!-- Centro: título -->
     <h1>ZPROVEART</h1>
 
-    <div class="page-title-spacer"></div>
+    <!-- Derecha: botón filtros -->
+    <button type="button"
+            class="btn btn-secondary page-filters-toggle js-filters-toggle"
+            aria-expanded="false"
+            aria-label="Mostrar filtros">
+      <span class="chev">▾</span>
+    </button>
 </div>

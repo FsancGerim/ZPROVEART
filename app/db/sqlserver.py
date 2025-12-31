@@ -310,9 +310,16 @@ def get_sales_12m(itmrefs: list[str]) -> list[dict]:
 
 # BLOQUE DE OBTENER FAMILIAS CON CACHÉ
 def _get_fams_distinct() -> list[dict]:
-    sql = f"""
-    SELECT DISTINCT COD_FAM_0, DES_FAM_0
-    FROM ZPROART4;
+    sql = """
+    SELECT COD_FAM_0, DES_FAM_0
+    FROM (
+        SELECT DISTINCT COD_FAM_0, DES_FAM_0
+        FROM ZPROART4
+    ) AS x
+    ORDER BY
+        CASE WHEN TRY_CONVERT(INT, COD_FAM_0) IS NULL THEN 1 ELSE 0 END,
+        TRY_CONVERT(INT, COD_FAM_0),
+        COD_FAM_0;
     """
     with get_connection() as conn:
         cur = conn.cursor()
