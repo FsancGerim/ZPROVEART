@@ -3,7 +3,8 @@ from __future__ import annotations
 import time
 from datetime import date
 import pyodbc
-from typing import List, Dict, Optional
+from typing import Optional
+
 pyodbc.pooling = True
 
 from app.config import (
@@ -13,6 +14,7 @@ from app.config import (
     SQL_PASS,
     SQL_DRIVER,
 )
+
 
 def get_connection():
     conn_str = (
@@ -26,14 +28,94 @@ def get_connection():
     )
     return pyodbc.connect(conn_str, timeout=10, autocommit=True)
 
+
 def test_connection():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT 1")
         return cursor.fetchone()[0]
 
+
+def _sanitize_list(vals: list[str] | None) -> list[str]:
+    return [str(v).strip() for v in (vals or []) if v and str(v).strip()]
+
+
+def _add_family_filter(sql: str, params: list, fams: list[str]) -> tuple[str, list]:
+    """
+    Aplica filtro por familias usando ZPROART4 (como ya tenías).
+    """
+    if not fams:
+        return sql, params
+
+    placeholders = ",".join("?" for _ in fams)
+    sql += f"""
+    AND EXISTS (
+        SELECT 1
+        FROM ZPROART4 AS Z4
+        WHERE Z4.ITMREF_0 = ZTP.ITMREF_0
+          AND Z4.COD_FAM_0 IN ({placeholders})
+    )
+    """
+    params.extend(fams)
+    return sql, params
+
+
+def _add_subfams_by_fam_filter(
+    sql: str,
+    params: list,
+    fams: list[str],
+    subfams_by_fam: dict[str, list[str]] | None,
+) -> tuple[str, list]:
+    """
+    Filtro por grupos:
+      - Si una familia NO tiene subfamilias seleccionadas -> entra completa
+      - Si una familia TIENE subfamilias seleccionadas -> filtra por esas subfamilias SOLO dentro de esa familia
+    Se aplica sobre ZTP.TSICOD_0_0 (familia) y ZTP.TSICOD_1_0 (subfamilia).
+    """
+    if not fams:
+        return sql, params
+
+    subfams_by_fam = subfams_by_fam or {}
+
+    # Normaliza (solo claves que estén en fams)
+    submap: dict[str, list[str]] = {}
+    for fam in fams:
+        subs = _sanitize_list(subfams_by_fam.get(fam, []))
+        if subs:
+            submap[fam] = subs
+
+    # Si no hay ninguna selección de subfamilias, no añadimos nada.
+    if not submap:
+        return sql, params
+
+    fams_without_sub = [f for f in fams if f not in submap]
+
+    or_parts: list[str] = []
+    or_params: list = []
+
+    # Familias completas (sin subfamilias marcadas)
+    if fams_without_sub:
+        placeholders = ",".join("?" for _ in fams_without_sub)
+        or_parts.append(f"(ZTP.TSICOD_0_0 IN ({placeholders}))")
+        or_params.extend(fams_without_sub)
+
+    # Familias con subfamilias seleccionadas
+    for fam, subs in submap.items():
+        ph = ",".join("?" for _ in subs)
+        or_parts.append(f"(ZTP.TSICOD_0_0 = ? AND ZTP.TSICOD_1_0 IN ({ph}))")
+        or_params.append(fam)
+        or_params.extend(subs)
+
+    if or_parts:
+        sql += " AND (\n      " + "\n   OR ".join(or_parts) + "\n    )\n"
+        params.extend(or_params)
+
+    return sql, params
+
+
 def count_products(
     families: list[str] | None = None,
+    subfams_by_fam: dict[str, list[str]] | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
     supp_from: str | None = None,
@@ -41,9 +123,9 @@ def count_products(
     comp_from: str | None = None,
     comp_to: str | None = None,
     art_from: str | None = None,
-    art_to: str | None = None
+    art_to: str | None = None,
 ) -> int:
-    fams = [f.strip() for f in (families or []) if f and f.strip()]
+    fams = _sanitize_list(families)
 
     sql = """
     SELECT COUNT(1)
@@ -54,6 +136,7 @@ def count_products(
 
     params: list = []
 
+    # Rangos artículo
     if art_from:
         sql += " AND ZTP.ITMREF_0 >= ?\n"
         params.append(art_from)
@@ -61,6 +144,7 @@ def count_products(
         sql += " AND ZTP.ITMREF_0 <= ?\n"
         params.append(art_to)
 
+    # Rangos proveedor
     if supp_from:
         sql += " AND ZTP.BPSNUM_0 >= ?\n"
         params.append(supp_from)
@@ -68,6 +152,7 @@ def count_products(
         sql += " AND ZTP.BPSNUM_0 <= ?\n"
         params.append(supp_to)
 
+    # Rangos comprador / comercial
     if comp_from:
         sql += " AND ZTP.COD_COM_0 >= ?\n"
         params.append(comp_from)
@@ -75,18 +160,13 @@ def count_products(
         sql += " AND ZTP.COD_COM_0 <= ?\n"
         params.append(comp_to)
 
-    if fams:
-        placeholders = ",".join("?" for _ in fams)
-        sql += f"""
-        AND EXISTS (
-            SELECT 1
-            FROM ZPROART4 AS Z4
-            WHERE Z4.ITMREF_0 = ZTP.ITMREF_0
-              AND Z4.COD_FAM_0 IN ({placeholders})
-        )
-        """
-        params.extend(fams)
+    # Filtro por familias (ZPROART4)
+    sql, params = _add_family_filter(sql, params, fams)
 
+    # Filtro subfamilias por familia (grupos)
+    sql, params = _add_subfams_by_fam_filter(sql, params, fams, subfams_by_fam)
+
+    # Fechas
     if date_from:
         sql += " AND ZTP.FUC_0 >= ?\n"
         params.append(date_from)
@@ -101,11 +181,11 @@ def count_products(
         return int(cur.fetchone()[0])
 
 
-
 def get_products(
     page: int,
     page_size: int,
     families: Optional[list[str]] = None,
+    subfams_by_fam: dict[str, list[str]] | None = None,
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
     supp_from: Optional[str] = None,
@@ -114,18 +194,17 @@ def get_products(
     comp_to: Optional[str] = None,
     art_from: Optional[str] = None,
     art_to: Optional[str] = None,
-    year: int = 2025,  # <-- año para ZTCOMVEN
+    year: int = 2025,
 ) -> list[dict]:
     """
     Listado paginado desde ZTPROVEART (base), con joins de datos auxiliares.
     ZTCOMVEN se une filtrando por año EN EL ON (para no romper paginación).
     """
 
-    # Sanitizado mínimo (por si acaso)
     page = max(1, int(page or 1))
     page_size = max(1, min(int(page_size or 25), 200))
 
-    fams = [f.strip() for f in (families or []) if f and f.strip()]
+    fams = _sanitize_list(families)
 
     sql = """
     DECLARE @Page INT = ?;
@@ -151,7 +230,9 @@ def get_products(
             ZTP.MED_PZ_0,
             ZTP.MED_CJ_0,
             ZTP.CUBIC_0,
-            ZTP.COD_COM_0
+            ZTP.COD_COM_0,
+            ZTP.TSICOD_0_0 AS COD_FAM_ZTP,
+            ZTP.TSICOD_1_0 AS COD_SUBFAM_ZTP
         FROM ZTPROVEART AS ZTP
         WHERE ZTP.BPSNUM_0 IS NOT NULL
           AND ZTP.BPSNUM_0 <> ''
@@ -159,7 +240,7 @@ def get_products(
 
     params: list = [page, page_size]
 
-    # Filtros
+    # Rangos artículo
     if art_from:
         sql += " AND ZTP.ITMREF_0 >= ?\n"
         params.append(art_from)
@@ -167,6 +248,7 @@ def get_products(
         sql += " AND ZTP.ITMREF_0 <= ?\n"
         params.append(art_to)
 
+    # Rangos proveedor
     if supp_from:
         sql += " AND ZTP.BPSNUM_0 >= ?\n"
         params.append(supp_from)
@@ -174,6 +256,7 @@ def get_products(
         sql += " AND ZTP.BPSNUM_0 <= ?\n"
         params.append(supp_to)
 
+    # Rangos comprador / comercial
     if comp_from:
         sql += " AND ZTP.COD_COM_0 >= ?\n"
         params.append(comp_from)
@@ -181,18 +264,13 @@ def get_products(
         sql += " AND ZTP.COD_COM_0 <= ?\n"
         params.append(comp_to)
 
-    if fams:
-        placeholders = ",".join("?" for _ in fams)
-        sql += f"""
-          AND EXISTS (
-              SELECT 1
-              FROM ZPROART4 AS Z4
-              WHERE Z4.ITMREF_0 = ZTP.ITMREF_0
-                AND Z4.COD_FAM_0 IN ({placeholders})
-          )
-        """
-        params.extend(fams)
+    # Filtro por familias (ZPROART4)
+    sql, params = _add_family_filter(sql, params, fams)
 
+    # Filtro subfamilias por familia (grupos)
+    sql, params = _add_subfams_by_fam_filter(sql, params, fams, subfams_by_fam)
+
+    # Fechas
     if date_from:
         sql += " AND ZTP.FUC_0 >= ?\n"
         params.append(date_from)
@@ -228,6 +306,9 @@ def get_products(
         base.MED_CJ_0,
         base.CUBIC_0,
         base.COD_COM_0,
+
+        base.COD_FAM_ZTP,
+        base.COD_SUBFAM_ZTP,
 
         BPS.BPSNAM_0,
         BPS.ZFRECUPED_0,
@@ -308,6 +389,7 @@ def get_sales_12m(itmrefs: list[str]) -> list[dict]:
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 
+
 # BLOQUE DE OBTENER FAMILIAS CON CACHÉ
 def _get_fams_distinct() -> list[dict]:
     sql = """
@@ -327,8 +409,11 @@ def _get_fams_distinct() -> list[dict]:
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 
+
 _FAMS_CACHE = {"ts": 0.0, "data": []}
 _FAMS_TTL = 60 * 10  # 10 minutos en caché
+
+
 def get_fams_cached() -> list[dict]:
     now = time.time()
     if _FAMS_CACHE["data"] and (now - _FAMS_CACHE["ts"]) < _FAMS_TTL:
@@ -338,6 +423,68 @@ def get_fams_cached() -> list[dict]:
     _FAMS_CACHE["data"] = data
     _FAMS_CACHE["ts"] = now
     return data
+
+
+def _get_subfams_by_fam(cod_fam: str) -> list[dict]:
+    """
+    Devuelve subfamilias de una familia con su descripción.
+    La descripción SIEMPRE cuelga de IDENT1_0 = '21' en ATABDIV.
+    """
+    IDENT1_FIXED = "21"
+
+    sql = """
+    ;WITH sub AS (
+        SELECT DISTINCT
+            RIGHT('0000' + LTRIM(RTRIM(ZTP.TSICOD_1_0)), 4) AS COD_SUBFAM
+        FROM ZTPROVEART AS ZTP
+        WHERE ZTP.TSICOD_0_0 = ?
+          AND ZTP.TSICOD_1_0 IS NOT NULL
+          AND LTRIM(RTRIM(ZTP.TSICOD_1_0)) <> ''
+    )
+    SELECT
+        sub.COD_SUBFAM,
+        ATX.TEXTE_0 AS DES_SUBFAM
+    FROM sub
+    LEFT JOIN GERIMPORT.ATEXTRA AS ATX
+      ON ATX.CODFIC_0 = 'ATABDIV'
+     AND ATX.ZONE_0   = 'LNGDES'
+     AND ATX.LANGUE_0 = 'SPA'
+     AND ATX.IDENT1_0 = ?
+     AND ATX.IDENT2_0 = sub.COD_SUBFAM
+    ORDER BY
+        CASE WHEN TRY_CONVERT(INT, sub.COD_SUBFAM) IS NULL THEN 1 ELSE 0 END,
+        TRY_CONVERT(INT, sub.COD_SUBFAM),
+        sub.COD_SUBFAM;
+    """
+
+    with get_connection() as conn:
+        cur = conn.cursor()
+        # cod_fam → filtra ZTPROVEART
+        # IDENT1_FIXED → ATABDIV 
+        cur.execute(sql, [cod_fam, IDENT1_FIXED])
+        cols = [c[0] for c in cur.description]
+        return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+
+
+_SUBFAMS_CACHE: dict[str, dict] = {}
+_SUBFAMS_TTL = 60 * 10
+
+
+def get_subfams_cached(cod_fam: str) -> list[dict]:
+    cod_fam = (cod_fam or "").strip()
+    if not cod_fam:
+        return []
+
+    now = time.time()
+    entry = _SUBFAMS_CACHE.get(cod_fam)
+    if entry and entry["data"] and (now - entry["ts"]) < _SUBFAMS_TTL:
+        return entry["data"]
+
+    data = _get_subfams_by_fam(cod_fam)
+    _SUBFAMS_CACHE[cod_fam] = {"ts": now, "data": data}
+    return data
+
 
 def get_eta_rows(itmrefs: list[str]) -> list[dict]:
     if not itmrefs:

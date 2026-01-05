@@ -9,12 +9,13 @@
    {%- for fc in family_list -%}&family={{ fc|urlencode }}{%- endfor -%}
    {%- if date_from -%}&from={{ date_from }}{%- endif -%}
    {%- if date_to -%}&to={{ date_to }}{%- endif -%}
-   {%- if supp_from -%}&supp_from={{ supp_from }}{%- endif -%}
-   {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
-   {%- if comp_from -%}&comp_from={{ comp_from }}{%- endif -%}
-   {%- if comp_to -%}&comp_to={{ comp_to }}{%- endif -%}
-   {%- if art_from -%}&art_from={{ art_from }}{%- endif -%}
-   {%- if art_to -%}&art_to={{ art_to }}{%- endif -%}">
+   {%- if supp_from -%}&supp_from={{ supp_from|urlencode }}{%- endif -%}
+   {%- if supp_to -%}&supp_to={{ supp_to|urlencode }}{%- endif -%}
+   {%- if comp_from -%}&comp_from={{ comp_from|urlencode }}{%- endif -%}
+   {%- if comp_to -%}&comp_to={{ comp_to|urlencode }}{%- endif -%}
+   {%- if art_from -%}&art_from={{ art_from|urlencode }}{%- endif -%}
+   {%- if art_to -%}&art_to={{ art_to|urlencode }}{%- endif -%}
+   {%- for k, v in subfam_params -%}&{{ k }}={{ v|urlencode }}{%- endfor -%}">
     <span class="arrow">‹</span>
 </a>
 {% else %}
@@ -30,12 +31,13 @@
    {%- for fc in family_list -%}&family={{ fc|urlencode }}{%- endfor -%}
    {%- if date_from -%}&from={{ date_from }}{%- endif -%}
    {%- if date_to -%}&to={{ date_to }}{%- endif -%}
-   {%- if supp_from -%}&supp_from={{ supp_from }}{%- endif -%}
-   {%- if supp_to -%}&supp_to={{ supp_to }}{%- endif -%}
-   {%- if comp_from -%}&comp_from={{ comp_from }}{%- endif -%}
-   {%- if comp_to -%}&comp_to={{ comp_to }}{%- endif -%}
-   {%- if art_from -%}&art_from={{ art_from }}{%- endif -%}
-   {%- if art_to -%}&art_to={{ art_to }}{%- endif -%}">
+   {%- if supp_from -%}&supp_from={{ supp_from|urlencode }}{%- endif -%}
+   {%- if supp_to -%}&supp_to={{ supp_to|urlencode }}{%- endif -%}
+   {%- if comp_from -%}&comp_from={{ comp_from|urlencode }}{%- endif -%}
+   {%- if comp_to -%}&comp_to={{ comp_to|urlencode }}{%- endif -%}
+   {%- if art_from -%}&art_from={{ art_from|urlencode }}{%- endif -%}
+   {%- if art_to -%}&art_to={{ art_to|urlencode }}{%- endif -%}
+   {%- for k, v in subfam_params -%}&{{ k }}={{ v|urlencode }}{%- endfor -%}">
     <span class="arrow">›</span>
 </a>
 {% else %}
