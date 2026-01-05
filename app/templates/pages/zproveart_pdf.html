@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <base href="{{ request.base_url }}">
 
+  <!-- CSS reutilizado -->
   <style>{{ cards_css | safe }}</style>
   <style>{{ pdf_css | safe }}</style>
 
@@ -14,80 +15,16 @@
 
 <body class="pdf-debug">
 
-  {% include "partials/header_pdf.html" %}
-
   <main class="pdf-content">
-    <section class="pdf-placeholder card">
-      <div class="card-head">
-        <div class="header-row">
-          <div class="head-item head-art">
-            <div class="h1">Vista PDF</div>
-            <div class="h2">Estructura base (sin tarjetas todavía)</div>
-          </div>
-
-          <div class="head-item head-family">
-            <div class="h2">Productos en página</div>
-            <div class="h1">{{ products|length }}</div>
-          </div>
-
-          <div class="head-item head-status">
-            <div class="h2">Página</div>
-            <div class="h1">{{ page }} / {{ total_pages }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-body block">
-        <div class="kv-grid">
-          <div class="kv">
-            <div class="k">Familias</div>
-            <div class="v">
-              {% if family_list and family_list|length > 0 %}
-                {{ family_list | join(", ") }}
-              {% else %}
-                Todas
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="kv">
-            <div class="k">Fechas</div>
-            <div class="v">
-              {% if date_from or date_to %}
-                {{ date_from or "…" }} → {{ date_to or "…" }}
-              {% else %}
-                (sin filtro)
-              {% endif %}
-            </div>
-          </div>
-
-          {% if supp_from or supp_to %}
-          <div class="kv">
-            <div class="k">Proveedor</div>
-            <div class="v">{{ supp_from or "…" }} → {{ supp_to or "…" }}</div>
-          </div>
-          {% endif %}
-
-          {% if comp_from or comp_to %}
-          <div class="kv">
-            <div class="k">Comprador</div>
-            <div class="v">{{ comp_from or "…" }} → {{ comp_to or "…" }}</div>
-          </div>
-          {% endif %}
-
-          {% if art_from or art_to %}
-          <div class="kv">
-            <div class="k">Artículos</div>
-            <div class="v">{{ art_from or "…" }} → {{ art_to or "…" }}</div>
-          </div>
-          {% endif %}
-        </div>
-
-        <div style="margin-top:10px; color:#555; font-size:10px;">
-          Consejo: cuando empieces con tarjetas, reutiliza clases <b>.card</b>/<b>.grid</b> y luego ajustamos densidad para A4 horizontal.
-        </div>
-      </div>
+    <!-- ===============================
+         GRID DE TARJETAS (MOCK)
+         =============================== -->
+    <section class="grid pdf-grid">
+      {% for p in products %}
+        {% include "components/product_card_pdf.html" %}
+      {% endfor %}
     </section>
+
   </main>
 
 </body>

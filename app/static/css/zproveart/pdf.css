@@ -1,71 +1,150 @@
-@page { size: A4 landscape; margin: 14mm 10mm 12mm 10mm; }
+/* =========================================================
+   PDF.CSS (DEPURACIÓN HTML + PDF)
+   - PDF real: header lo pone Playwright (display_header_footer)
+   - /pdf/html: header fake fijo para debug
+   ========================================================= */
 
-html, body { margin: 0; padding: 0; }
-body { font-family: Arial, sans-serif; color: #111; font-size: 10px; }
-
-/* Header fijo: se repetirá en cada página */
-.pdf-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  padding: 6mm 8mm 4mm 8mm;
-  border-bottom: 1px solid #e5e5e5;
-  background: #fff;
-  box-sizing: border-box;
+:root{
+  --pdf-top: 18mm; /* altura header fake (solo debug) */
 }
 
-.pdf-header__row{
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10mm;
+@page{
+  size: A4 landscape;
+  margin: 0mm; /* el hueco del header real lo da pw_page.pdf(margin.top) */
 }
 
-.pdf-title { font-size: 16px; font-weight: 800; letter-spacing: 0.3px; }
-.pdf-subtitle { font-size: 10px; color: #555; margin-top: 1mm; }
-
-.pdf-meta{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  text-align: right;
-  color: #333;
-}
-.pdf-meta__item b { font-weight: 700; }
-
-.pdf-filters{
-  margin-top: 4mm;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+html, body{
+  margin: 0;
+  padding: 0;
 }
 
-.pill{
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  padding: 2.5px 8px;
-  border: 1px solid #e6e6e6;
-  border-radius: 999px;
-  background: #fafafa;
-  line-height: 1.2;
-  white-space: nowrap;
+body{
+  font-family: Arial, sans-serif;
+  color: #111;
+  font-size: 10px;
+  padding-top: 22m;
 }
 
-.pill b { font-weight: 700; }
-.pill--muted { color: #666; background: #fff; }
+/* =========================================================
+   HEADER FAKE (solo debug)
+   ========================================================= */
 
-/* Contenido: deja espacio al header */
+/* Por defecto: oculto SIEMPRE */
+.pdf-header{
+  display: none !important;
+}
+
+/* En modo debug (solo pantalla) sí lo mostramos */
+@media screen{
+  body.pdf-debug .pdf-header{
+    display: block !important;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--pdf-top);
+    padding: 4mm 6mm;
+    border-bottom: 1px solid #e5e5e5;
+    background: #fff;
+    box-sizing: border-box;
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  body.pdf-debug .pdf-header__row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8mm;
+    height: 100%;
+  }
+
+  body.pdf-debug .pdf-left{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  body.pdf-debug .pdf-right{
+    white-space: nowrap;
+    font-size: 10px;
+    color: #333;
+    text-align: right;
+  }
+
+  body.pdf-debug .pdf-title{
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+  }
+
+  body.pdf-debug .pdf-subtitle{ display: none; }
+
+  body.pdf-debug .pill{
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 2px 6px;
+    border: 1px solid #e6e6e6;
+    border-radius: 999px;
+    background: #fafafa;
+    line-height: 1.15;
+    white-space: nowrap;
+    font-size: 9.5px;
+  }
+
+  body.pdf-debug .pill b{ font-weight: 800; }
+  body.pdf-debug .pill--muted{ color: #666; background: #fff; }
+}
+
+/* Si alguien imprime desde /pdf/html, NO queremos header fake */
+@media print{
+  .pdf-header{ display: none !important; }
+}
+
+/* =========================================================
+   CONTENIDO
+   ========================================================= */
+
 .pdf-content{
-  margin-top: 34mm; /* ajusta si tu header crece */
+  margin: 0;
   padding: 0 2mm;
   box-sizing: border-box;
+  padding-top: 20mm;
 }
 
-/* Bloque “lienzo” aunque no haya tarjetas (para que no se vea vacío) */
-.pdf-placeholder{
-  border: 1px dashed #ddd;
-  border-radius: 10px;
-  padding: 12mm;
-  color: #666;
+/* Debug: empujar contenido debajo del header fake */
+@media screen{
+  body{ background: #f0f0f0; }
+
+  body.pdf-debug .pdf-content{
+    width: 297mm;
+    min-height: 210mm;
+    margin: 0 auto;
+    padding-top: var(--pdf-top);
+    background: #fff;
+  }
+
+  body.pdf-mode .pdf-content{
+    width: 297mm;
+    min-height: 210mm;
+    margin: 0 auto;
+    background: #fff;
+  }
+}
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.pdf-grid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5mm;
+}
+
+/* Evitar cortes de tarjeta entre páginas */
+.product-card{
+  break-inside: avoid;
+  page-break-inside: avoid;
 }

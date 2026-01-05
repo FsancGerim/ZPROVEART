@@ -15,6 +15,38 @@ from app.config import (
     SQL_DRIVER,
 )
 
+def _sanitize_years(years: list[int] | None) -> list[int]:
+    """
+    Normaliza lista de años.
+    - Si None / vacío -> devuelve [año actual, año anterior]
+    - Convierte a int, elimina duplicados, ordena DESC.
+    - Limita a un rango razonable para evitar basura.
+    """
+    y_now = date.today().year
+
+    if not years:
+        return [y_now, y_now - 1]
+
+    out: list[int] = []
+    seen = set()
+
+    for y in years:
+        try:
+            yi = int(y)
+        except Exception:
+            continue
+        if yi < 1990 or yi > (y_now + 1):
+            continue
+        if yi in seen:
+            continue
+        seen.add(yi)
+        out.append(yi)
+
+    if not out:
+        return [y_now, y_now - 1]
+
+    out.sort(reverse=True)
+    return out
 
 def get_connection():
     conn_str = (
@@ -194,19 +226,21 @@ def get_products(
     comp_to: Optional[str] = None,
     art_from: Optional[str] = None,
     art_to: Optional[str] = None,
-    year: int = 2025,
+    years: list[int] | None = None,
 ) -> list[dict]:
     """
     Listado paginado desde ZTPROVEART (base), con joins de datos auxiliares.
-    ZTCOMVEN se une filtrando por año EN EL ON (para no romper paginación).
+    ZTCOMVEN se une SUMADO por ITMREF_0 para evitar duplicados cuando usamos varios años.
     """
 
     page = max(1, int(page or 1))
     page_size = max(1, min(int(page_size or 25), 200))
 
     fams = _sanitize_list(families)
+    years = _sanitize_years(years)
+    years_ph = ",".join("?" for _ in years)
 
-    sql = """
+    sql = f"""
     DECLARE @Page INT = ?;
     DECLARE @PageSize INT = ?;
 
@@ -274,13 +308,12 @@ def get_products(
     if date_from:
         sql += " AND ZTP.FUC_0 >= ?\n"
         params.append(date_from)
-
     if date_to:
         sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)\n"
         params.append(date_to)
 
     # Cierre CTE + paginación
-    sql += """
+    sql += f"""
         ORDER BY ZTP.FUC_0 DESC, ZTP.ITMREF_0 DESC
         OFFSET (@Page - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
@@ -342,13 +375,25 @@ def get_products(
         ON base.ITMREF_0 = ZURL.ITMREF_0
     LEFT JOIN ZPROART4 AS Z4
         ON base.ITMREF_0 = Z4.ITMREF_0
-    LEFT JOIN ZTCOMVEN AS ZTCV
+
+    LEFT JOIN (
+        SELECT
+            ITMREF_0,
+            SUM(NUM_CLIENTES_0) AS NUM_CLIENTES_0,
+            SUM(NUM_ENTRADAS_0) AS NUM_ENTRADAS_0,
+            SUM(NUM_VENTAS_0)   AS NUM_VENTAS_0,
+            SUM(NUM_OCU_0)      AS NUM_OCU_0
+        FROM ZTCOMVEN
+        WHERE ANNO_0 IN ({years_ph})
+        GROUP BY ITMREF_0
+    ) AS ZTCV
         ON base.ITMREF_0 = ZTCV.ITMREF_0
-       AND ZTCV.ANNO_0 = ?
+
     ORDER BY base.FUC_0 DESC, base.ITMREF_0 DESC;
     """
 
-    params.append(year)
+    # años al final (para el subquery)
+    params.extend(years)
 
     with get_connection() as conn:
         cur = conn.cursor()
@@ -509,3 +554,184 @@ def get_eta_rows(itmrefs: list[str]) -> list[dict]:
         cur.execute(sql, itmrefs)
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+def get_products_all(
+    families: Optional[list[str]] = None,
+    subfams_by_fam: dict[str, list[str]] | None = None,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    supp_from: Optional[str] = None,
+    supp_to: Optional[str] = None,
+    comp_from: Optional[str] = None,
+    comp_to: Optional[str] = None,
+    art_from: Optional[str] = None,
+    art_to: Optional[str] = None,
+    years: list[int] | None = None,
+    max_rows: int = 5000,  # safety (ajusta)
+) -> list[dict]:
+    """
+    Listado SIN paginación desde ZTPROVEART (para PDF).
+    max_rows es un cinturón de seguridad.
+    ZTCOMVEN se une SUMADO por ITMREF_0 para evitar duplicados cuando usamos varios años.
+    """
+
+    fams = _sanitize_list(families)
+    max_rows = max(1, min(int(max_rows or 5000), 50000))
+
+    years = _sanitize_years(years)
+    years_ph = ",".join("?" for _ in years)
+
+    sql = f"""
+    WITH base AS (
+        SELECT TOP (?)
+            ZTP.ITMREF_0,
+            ZTP.ITMDES_0,
+            ZTP.BPSNUM_0,
+            ZTP.FUC_0,
+            ZTP.UQTY_0,
+            ZTP.FOB_0,
+            ZTP.PUE_0,
+            ZTP.PVPT4_0,
+            ZTP.DTO_0,
+            ZTP.DIF_0,
+            ZTP.ARANCEL_0,
+            ZTP.EX_ACT_0,
+            ZTP.EX_DISP_0,
+            ZTP.EX_PREV_0,
+            ZTP.COD_ART_PRO_0,
+            ZTP.MED_PZ_0,
+            ZTP.MED_CJ_0,
+            ZTP.CUBIC_0,
+            ZTP.COD_COM_0,
+            ZTP.TSICOD_0_0 AS COD_FAM_ZTP,
+            ZTP.TSICOD_1_0 AS COD_SUBFAM_ZTP
+        FROM ZTPROVEART AS ZTP
+        WHERE ZTP.BPSNUM_0 IS NOT NULL
+          AND ZTP.BPSNUM_0 <> ''
+    """
+
+    params: list = [max_rows]
+
+    # Rangos artículo
+    if art_from:
+        sql += " AND ZTP.ITMREF_0 >= ?\n"
+        params.append(art_from)
+    if art_to:
+        sql += " AND ZTP.ITMREF_0 <= ?\n"
+        params.append(art_to)
+
+    # Rangos proveedor
+    if supp_from:
+        sql += " AND ZTP.BPSNUM_0 >= ?\n"
+        params.append(supp_from)
+    if supp_to:
+        sql += " AND ZTP.BPSNUM_0 <= ?\n"
+        params.append(supp_to)
+
+    # Rangos comprador / comercial
+    if comp_from:
+        sql += " AND ZTP.COD_COM_0 >= ?\n"
+        params.append(comp_from)
+    if comp_to:
+        sql += " AND ZTP.COD_COM_0 <= ?\n"
+        params.append(comp_to)
+
+    # Filtro por familias (ZPROART4)
+    sql, params = _add_family_filter(sql, params, fams)
+
+    # Filtro subfamilias por familia (grupos)
+    sql, params = _add_subfams_by_fam_filter(sql, params, fams, subfams_by_fam)
+
+    # Fechas
+    if date_from:
+        sql += " AND ZTP.FUC_0 >= ?\n"
+        params.append(date_from)
+    if date_to:
+        sql += " AND ZTP.FUC_0 < DATEADD(DAY, 1, ?)\n"
+        params.append(date_to)
+
+    sql += f"""
+        ORDER BY ZTP.FUC_0 DESC, ZTP.ITMREF_0 DESC
+    )
+    SELECT
+        base.ITMREF_0,
+        base.ITMDES_0,
+        base.BPSNUM_0,
+        ZURL.URL_0,
+        base.FUC_0,
+        base.UQTY_0,
+        base.FOB_0,
+        base.PUE_0,
+        base.PVPT4_0,
+        base.DTO_0,
+        base.DIF_0,
+        base.ARANCEL_0,
+        base.EX_ACT_0,
+        base.EX_DISP_0,
+        base.EX_PREV_0,
+        base.COD_ART_PRO_0,
+        base.MED_PZ_0,
+        base.MED_CJ_0,
+        base.CUBIC_0,
+        base.COD_COM_0,
+
+        base.COD_FAM_ZTP,
+        base.COD_SUBFAM_ZTP,
+
+        BPS.BPSNAM_0,
+        BPS.ZFRECUPED_0,
+        BPS.ZNUMPALMIN_0,
+        BPS.ZPLAZOENTRE_0,
+        BPS.ZIMPMINPED_0,
+        BPS.ZVOLMINCOM_0,
+
+        Z4.COD_FAM_0,
+        Z4.DES_FAM_0,
+        Z4.QTY_PEND_SC_0,
+        Z4.UNXCAJ_0,
+        Z4.UNXPAL_0,
+        Z4.UNXPAQ_0,
+        Z4.ZPUERTO_0,
+        Z4.ZSLIM_0,
+        Z4.CMC_0,
+        Z4.ZVERNTV_0,
+        Z4.ZVTASINSTOCK_0,
+        Z4.ESTADO_0,
+
+        ZTCV.NUM_CLIENTES_0,
+        ZTCV.NUM_ENTRADAS_0,
+        ZTCV.NUM_VENTAS_0,
+        ZTCV.NUM_OCU_0
+
+    FROM base
+    LEFT JOIN BPSUPPLIER AS BPS
+        ON base.BPSNUM_0 = BPS.BPSNUM_0
+    LEFT JOIN ZURLIMAGENES AS ZURL
+        ON base.ITMREF_0 = ZURL.ITMREF_0
+    LEFT JOIN ZPROART4 AS Z4
+        ON base.ITMREF_0 = Z4.ITMREF_0
+
+    LEFT JOIN (
+        SELECT
+            ITMREF_0,
+            SUM(NUM_CLIENTES_0) AS NUM_CLIENTES_0,
+            SUM(NUM_ENTRADAS_0) AS NUM_ENTRADAS_0,
+            SUM(NUM_VENTAS_0)   AS NUM_VENTAS_0,
+            SUM(NUM_OCU_0)      AS NUM_OCU_0
+        FROM ZTCOMVEN
+        WHERE ANNO_0 IN ({years_ph})
+        GROUP BY ITMREF_0
+    ) AS ZTCV
+        ON base.ITMREF_0 = ZTCV.ITMREF_0
+
+    ORDER BY base.FUC_0 DESC, base.ITMREF_0 DESC;
+    """
+
+    params.extend(years)
+
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(sql, params)
+        cols = [c[0] for c in cur.description]
+        return [dict(zip(cols, row)) for row in cur.fetchall()]
+

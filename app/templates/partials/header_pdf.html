@@ -1,43 +1,45 @@
-<div class="pdf-header">
+<div class="pdf-header pdf-header--compact">
   <div class="pdf-header__row">
-    <div class="pdf-brand">
-      <div class="pdf-title">ZPROVEART</div>
-      <div class="pdf-subtitle">Listado de artículos</div>
+
+    <!-- IZQUIERDA: título + filtros -->
+    <div class="pdf-left">
+      <span class="pdf-title">ZPROVEART</span>
+
+      {% if family_list and family_list|length > 0 %}
+        <span class="pill"><b>Fam.</b> {{ family_list | join(", ") }}</span>
+      {% else %}
+        <span class="pill pill--muted"><b>Fam.</b> Todas</span>
+      {% endif %}
+
+      {% if subfamily_list is defined and subfamily_list and subfamily_list|length > 0 %}
+        <span class="pill"><b>Sub.</b> {{ subfamily_list | join(", ") }}</span>
+      {% endif %}
+
+      {% if date_from or date_to %}
+        <span class="pill"><b>Fechas</b> {{ date_from or "…" }} → {{ date_to or "…" }}</span>
+      {% else %}
+        <span class="pill pill--muted"><b>Fechas</b> sin filtro</span>
+      {% endif %}
+
+      {% if supp_from or supp_to %}
+        <span class="pill"><b>Prov.</b> {{ supp_from or "…" }} → {{ supp_to or "…" }}</span>
+      {% endif %}
+
+      {% if comp_from or comp_to %}
+        <span class="pill"><b>Comp.</b> {{ comp_from or "…" }} → {{ comp_to or "…" }}</span>
+      {% endif %}
+
+      {% if art_from or art_to %}
+        <span class="pill"><b>Art.</b> {{ art_from or "…" }} → {{ art_to or "…" }}</span>
+      {% endif %}
     </div>
 
-    <div class="pdf-meta">
-      <div class="pdf-meta__item"><b>Página:</b> {{ page }} / {{ total_pages }}</div>
-      {% if page_size %}<div class="pdf-meta__item"><b>Por página:</b> {{ page_size }}</div>{% endif %}
+    <!-- DERECHA: solo “por página” o nada -->
+    <div class="pdf-right">
+      {% if page_size %}
+        <span class="pdf-meta__item"><b>x pág.</b> {{ page_size }}</span>
+      {% endif %}
     </div>
-  </div>
 
-  <div class="pdf-filters">
-    {% if family_list and family_list|length > 0 %}
-      <span class="pill"><b>Familias</b>: {{ family_list | join(", ") }}</span>
-    {% else %}
-      <span class="pill pill--muted"><b>Familias</b>: Todas</span>
-    {% endif %}
-
-    {% if subfamily_list is defined and subfamily_list and subfamily_list|length > 0 %}
-      <span class="pill"><b>Subfamilias</b>: {{ subfamily_list | join(", ") }}</span>
-    {% endif %}
-
-    {% if date_from or date_to %}
-      <span class="pill"><b>Fechas</b>: {{ (date_from or "…") }} → {{ (date_to or "…") }}</span>
-    {% else %}
-      <span class="pill pill--muted"><b>Fechas</b>: (sin filtro)</span>
-    {% endif %}
-
-    {% if supp_from or supp_to %}
-      <span class="pill"><b>Proveedor</b>: {{ (supp_from or "…") }} → {{ (supp_to or "…") }}</span>
-    {% endif %}
-
-    {% if comp_from or comp_to %}
-      <span class="pill"><b>Comprador</b>: {{ (comp_from or "…") }} → {{ (comp_to or "…") }}</span>
-    {% endif %}
-
-    {% if art_from or art_to %}
-      <span class="pill"><b>Artículos</b>: {{ (art_from or "…") }} → {{ (art_to or "…") }}</span>
-    {% endif %}
   </div>
 </div>

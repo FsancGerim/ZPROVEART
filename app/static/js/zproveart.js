@@ -211,3 +211,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   refreshPanels();
 });
+
+// =========================
+// Generar PDF (mismos filtros que el form)
+// =========================
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest("#btnPdf");
+  if (!btn) return;
+
+  const form = btn.closest("form");
+  if (!form) return;
+
+  // UI: loading
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Generando PDF...";
+
+  const fd = new FormData(form);
+  const params = new URLSearchParams();
+
+  for (const [key, value] of fd.entries()) {
+    const v = String(value ?? "").trim();
+    if (!v) continue;
+    params.append(key, v);
+  }
+
+  params.delete("page");
+  params.delete("page_size");
+
+  const url = "/zproveart/pdf" + (params.toString() ? "?" + params.toString() : "");
+
+  // Navega al endpoint (descarga/abre PDF)
+  window.location.href = url;
+
+  // Si por algún motivo el navegador bloquea o tarda, re-habilita tras X segundos
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }, 15000);
+});
