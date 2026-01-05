@@ -174,7 +174,6 @@ async def zproveart_submit(request: Request):
         )
 
     return Response(status_code=204)
-<<<<<<< HEAD
 
 
 @app.get("/zproveart/pdf")
@@ -287,5 +286,4 @@ def zproveart_pdf(request: Request, page: str = "1", family: list[str] = Query(d
         media_type="application/pdf",
         headers={"Content-Disposition": 'inline; filename="zproveart.pdf"'},
     )
-=======
->>>>>>> a78d2c300d75867eaaef3a3f4b6c53f5f0ffc7b0
+

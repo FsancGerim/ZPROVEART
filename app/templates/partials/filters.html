@@ -38,10 +38,10 @@
         <div class="filter-group">
           <div class="filter-title small">Proveedor</div>
           <div class="filter-row">
-            <label>Desde</label>
+            <label class="muted">Desde</label>
             <input type="text" name="supp_from" inputmode="numeric" pattern="\d{5}" maxlength="5"
                   value="{{ supp_from or '' }}">
-            <label>Hasta</label>
+            <label class="muted">Hasta</label>
             <input type="text" name="supp_to" inputmode="numeric" pattern="\d{5}" maxlength="5"
                   value="{{ supp_to or '' }}">
           </div>
@@ -51,9 +51,9 @@
         <div class="filter-group">
           <div class="filter-title small">Comprador</div>
           <div class="filter-row">
-            <label>Desde</label>
+            <label class="muted">Desde</label>
             <input type="text" name="comp_from" maxlength="4" value="{{ comp_from or '' }}">
-            <label>Hasta</label>
+            <label class="muted">Hasta</label>
             <input type="text" name="comp_to" maxlength="4" value="{{ comp_to or '' }}">
           </div>
         </div>
@@ -62,9 +62,9 @@
         <div class="filter-group">
           <div class="filter-title small">Artículo</div>
           <div class="filter-row">
-            <label>Desde</label>
+            <label class="muted">Desde</label>
             <input type="text" name="art_from" maxlength="13" pattern="\d{13}" value="{{ art_from or '' }}">
-            <label>Hasta</label>
+            <label class="muted">Hasta</label>
             <input type="text" name="art_to" maxlength="13" pattern="\d{13}" value="{{ art_to or '' }}">
           </div>
         </div>
