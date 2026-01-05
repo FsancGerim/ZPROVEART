@@ -1,0 +1,71 @@
+@page { size: A4 landscape; margin: 14mm 10mm 12mm 10mm; }
+
+html, body { margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; color: #111; font-size: 10px; }
+
+/* Header fijo: se repetirá en cada página */
+.pdf-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: 6mm 8mm 4mm 8mm;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.pdf-header__row{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10mm;
+}
+
+.pdf-title { font-size: 16px; font-weight: 800; letter-spacing: 0.3px; }
+.pdf-subtitle { font-size: 10px; color: #555; margin-top: 1mm; }
+
+.pdf-meta{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  text-align: right;
+  color: #333;
+}
+.pdf-meta__item b { font-weight: 700; }
+
+.pdf-filters{
+  margin-top: 4mm;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill{
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2.5px 8px;
+  border: 1px solid #e6e6e6;
+  border-radius: 999px;
+  background: #fafafa;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pill b { font-weight: 700; }
+.pill--muted { color: #666; background: #fff; }
+
+/* Contenido: deja espacio al header */
+.pdf-content{
+  margin-top: 34mm; /* ajusta si tu header crece */
+  padding: 0 2mm;
+  box-sizing: border-box;
+}
+
+/* Bloque “lienzo” aunque no haya tarjetas (para que no se vea vacío) */
+.pdf-placeholder{
+  border: 1px dashed #ddd;
+  border-radius: 10px;
+  padding: 12mm;
+  color: #666;
+}
