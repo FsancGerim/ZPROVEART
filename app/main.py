@@ -251,7 +251,7 @@ def zproveart_pdf(request: Request, family: list[str] = Query(default=[])):
         comp_to=comp_to,
         art_from=art_from,
         art_to=art_to,
-        years=years,         # ✅ antes year=2025
+        years=years,         
         max_rows=20000,      # ajusta si hace falta
     )
 
@@ -319,7 +319,7 @@ def zproveart_pdf(request: Request, family: list[str] = Query(default=[])):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": 'inline; filename="zproveart.pdf"'},
+        headers={"Content-Disposition": 'attachment; filename="zproveart.pdf"'},
     )
 
 

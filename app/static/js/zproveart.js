@@ -242,7 +242,7 @@ document.addEventListener("click", function (e) {
   const url = "/zproveart/pdf" + (params.toString() ? "?" + params.toString() : "");
 
   // Navega al endpoint (descarga/abre PDF)
-  window.location.href = url;
+  window.open(url, "_blank", "noopener");
 
   // Si por algún motivo el navegador bloquea o tarda, re-habilita tras X segundos
   setTimeout(() => {
