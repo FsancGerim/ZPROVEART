@@ -187,6 +187,7 @@ async def zproveart_submit(request: Request):
     form = await request.form()
 
     itmref = (form.get("itmref") or "").strip()
+    bpsnum = (form.get("bpsnum") or "").strip()
     comment = (form.get("comment") or "").strip()
 
     selected_raw = form.get("selected")
@@ -198,6 +199,7 @@ async def zproveart_submit(request: Request):
             itmref=itmref,
             selected=selected,
             comment=comment,
+            bpsnum=bpsnum
         )
 
     return Response(status_code=204)

@@ -225,6 +225,7 @@
   <div class="block card-foot">
     <form class="actions js-send" method="post" action="/zproveart/submit">
       <input type="hidden" name="itmref" value="{{ p.ITMREF_0 }}">
+      <input type="hidden" name="bpsnum" value="{{ p.BPSNUM_0 }}">
       <label><input type="checkbox" name="selected" value="1"> Sel</label>
       <input type="text" name="comment" placeholder="Comentario...">
       <button class="btn btn-secondary" type="submit">Enviar</button>
