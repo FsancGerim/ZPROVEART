@@ -1,20 +1,43 @@
 <div style="width:100%; font-family:Arial; font-size:10px; padding:0 8mm; box-sizing:border-box;">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e5e5e5; padding:3mm 0;">
-    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-width:0;">
       <b style="font-size:14px;">ZPROVEART</b>
+
       {% if family_list and family_list|length > 0 %}
-        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fafafa;">Fam. {{ family_list|length }}</span>
+        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fafafa;">FAM. {{ family_list | join(", ") }}</span>
       {% else %}
-        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fff; color:#666;">Fam. Todas</span>
+        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fff; color:#666;">FAM. Todas</span>
       {% endif %}
+
       {% if date_from or date_to %}
-        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fafafa;">Fechas</span>
+        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fafafa;">
+          FECHAS. Desde {{ date_from or "…" }} Hasta {{ date_to or "…" }}
+        </span>
       {% else %}
         <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fff; color:#666;">Fechas sin filtro</span>
       {% endif %}
+
+      {% if supp_from or supp_to %}
+        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fafafa;">
+          PROV. Desde {{ supp_from or "…" }} Hasta {{ supp_to or "…" }}
+        </span>
+      {% endif %}
+
+      {% if comp_from or comp_to %}
+        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fafafa;">
+          COMP. Desde {{ comp_from or "…" }} Hasta {{ comp_to or "…" }}
+        </span>
+      {% endif %}
+
+      {% if art_from or art_to %}
+        <span style="border:1px solid #e6e6e6; border-radius:999px; padding:2px 6px; background:#fafafa;">
+          ART. Desde {{ art_from or "…" }} Hasta {{ art_to or "…" }}
+        </span>
+      {% endif %}
     </div>
+
     <div style="white-space:nowrap;">
-        {{ total }} artículos · pág. <span class="pageNumber"></span>/<span class="totalPages"></span>
+      {{ total }} artículos · pág. <span class="pageNumber"></span>/<span class="totalPages"></span>
     </div>
   </div>
 </div>

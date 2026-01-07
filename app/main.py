@@ -271,13 +271,24 @@ def zproveart_pdf(request: Request, family: list[str] = Query(default=[])):
 
     # header (Chromium permite pageNumber/totalPages con esos spans)
     header_html = templates.get_template("partials/pdf_header_playwright.html").render({
-        "request": request,
-        "total": total,
-        "family_list": family_list,
-        "date_from": date_from.isoformat() if date_from else "",
-        "date_to": date_to.isoformat() if date_to else "",
-    })
+    "request": request,
+    "total": total,
+    "family_list": family_list,
 
+    "subfams_by_fam": subfams_by_fam,   # opcional si lo quieres mostrar
+
+    "date_from": date_from.isoformat() if date_from else "",
+    "date_to": date_to.isoformat() if date_to else "",
+
+    "supp_from": supp_from or "",
+    "supp_to": supp_to or "",
+
+    "comp_from": comp_from or "",
+    "comp_to": comp_to or "",
+
+    "art_from": art_from or "",
+    "art_to": art_to or "",
+    })
     # CHUNK de tarjetas por “doc” (evita HTML gigantesco)
     CARDS_PER_PDF_CHUNK = 100  # prueba 40/60/80 según tamaño de cada card
 
@@ -310,77 +321,6 @@ def zproveart_pdf(request: Request, family: list[str] = Query(default=[])):
     )
 
 
-@app.get("/zproveart/pdf/html", response_class=HTMLResponse)
-def zproveart_pdf_html(request: Request, family: list[str] = Query(default=[])):
-    date_from = parse_date(request.query_params.get("from"))
-    date_to = parse_date(request.query_params.get("to"))
-    if date_from and date_to and date_from > date_to:
-        date_from, date_to = date_to, date_from
-
-    supp_from = request.query_params.get("supp_from")
-    supp_to = request.query_params.get("supp_to")
-    comp_from = request.query_params.get("comp_from")
-    comp_to = request.query_params.get("comp_to")
-    art_from = request.query_params.get("art_from")
-    art_to = request.query_params.get("art_to")
-
-    family_list = [str(f).strip() for f in family if f and str(f).strip()]
-    subfams_by_fam = parse_subfams_by_fam(request.query_params, family_list)
-
-    total = count_products(
-        families=family_list,
-        subfams_by_fam=subfams_by_fam,
-        date_from=date_from,
-        date_to=date_to,
-        supp_from=supp_from,
-        supp_to=supp_to,
-        comp_from=comp_from,
-        comp_to=comp_to,
-        art_from=art_from,
-        art_to=art_to,
-    )
-
-    years = _default_years()
-
-    products = get_products_all(
-        families=family_list,
-        subfams_by_fam=subfams_by_fam,
-        date_from=date_from,
-        date_to=date_to,
-        supp_from=supp_from,
-        supp_to=supp_to,
-        comp_from=comp_from,
-        comp_to=comp_to,
-        art_from=art_from,
-        art_to=art_to,
-        years=years,    # ✅ antes year=2025
-        max_rows=20000,
-    )
-
-    itmrefs = [p["ITMREF_0"] for p in products if p.get("ITMREF_0")]
-    sales_rows: list[dict] = []
-    eta_rows: list[dict] = []
-    for chunk in _chunks(itmrefs, 500):
-        sales_rows.extend(get_sales_12m(chunk))
-        eta_rows.extend(get_eta_rows(chunk))
-
-    products = format_products(products, sales_rows=sales_rows, eta_rows=eta_rows)
-
-    base_dir = Path(__file__).resolve().parent
-    cards_css = (base_dir / "static" / "css" / "zproveart" / "_cards_pdf.css").read_text("utf-8")
-    pdf_css = (base_dir / "static" / "css" / "zproveart" / "pdf.css").read_text("utf-8")
-
-    html = templates.get_template("pages/zproveart_pdf.html").render({
-        "request": request,
-        "products": products,
-        "total": total,
-        "cards_css": cards_css,
-        "pdf_css": pdf_css,
-    })
-
-    return HTMLResponse(content=html)
-
-
 def parse_subfams_by_fam(query_params, fams: list[str]) -> dict[str, list[str]]:
     """
     Lee params tipo subfam_12=1207&subfam_12=1208 y devuelve:
@@ -390,7 +330,7 @@ def parse_subfams_by_fam(query_params, fams: list[str]) -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
     for fam in fams:
         key = f"subfam_{fam}"
-        vals = query_params.getlist(key)  # 👈 importante: getlist
+        vals = query_params.getlist(key)
         vals = [str(v).strip() for v in vals if v and str(v).strip()]
         if vals:
             out[fam] = vals
@@ -419,7 +359,7 @@ def _merge_pdfs(pdf_list: list[bytes]) -> bytes:
     # 2) Si no, usamos PdfWriter (pypdf 6.x)
     if PdfWriter is not None:
         writer = PdfWriter()
-        from pypdf import PdfReader  # import aquí para asegurar disponibilidad
+        from pypdf import PdfReader 
         for b in pdf_list:
             reader = PdfReader(BytesIO(b))
             for page in reader.pages:

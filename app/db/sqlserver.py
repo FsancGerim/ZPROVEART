@@ -389,7 +389,7 @@ def get_products(
     ) AS ZTCV
         ON base.ITMREF_0 = ZTCV.ITMREF_0
 
-    ORDER BY base.FUC_0 DESC, base.ITMREF_0 DESC;
+    ORDER BY base.BPSNUM_0 DESC, base.ITMREF_0 DESC;
     """
 
     # años al final (para el subquery)
