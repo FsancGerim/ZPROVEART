@@ -5,8 +5,20 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   margin-top: 2px;
+}
+
+.der-div{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  color: #666;
+  font-size: 15px;
+  max-height: 45px;
+  text-align:center;
+  line-height: 1.1;
+  margin: 0;
+  gap: 0;
 }
 
 .page-logo{
@@ -24,6 +36,7 @@
 .page-filters-toggle{
   justify-self: end;      
   white-space: nowrap;
+  max-height: 42.5px;
 }
 
 .page.is-filters-open .page-filters-toggle .chev{

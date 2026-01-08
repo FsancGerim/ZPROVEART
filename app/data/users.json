@@ -1,0 +1,19 @@
+{
+  "users": [
+    {
+      "username": "G001", 
+      "password_hash": "$pbkdf2-sha256$29000$EGKstZbSGsP4f2.N8R6D0A$ssyCm/doRkXRQiktGhaFa0YcKCUmasDnmqJSw6mb6AQ",
+      "active": true
+    },
+    {
+      "username": "G004",
+      "password_hash": "$pbkdf2-sha256$29000$EGKstZbSGsP4f2.N8R6D0A$ssyCm/doRkXRQiktGhaFa0YcKCUmasDnmqJSw6mb6AQ",
+      "active": true
+    },
+    {
+      "username": "invitado",
+      "password_hash": "$pbkdf2-sha256$29000$kjKG0DpnbM15L4Ww9v7/fw$xEt4B/e40mzlzixVXfmQqMYTjBZsWuUcVuPSwJYIHLk",
+      "active": true
+    }
+  ]
+}

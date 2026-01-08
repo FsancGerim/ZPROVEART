@@ -23,6 +23,7 @@
       <div class="filter-title">Filtros</div>
 
       <div class="filters-right">
+
         <!-- Fecha -->
         <div class="filter-group">
           <div class="filter-title small">Fecha</div>
@@ -39,11 +40,34 @@
           <div class="filter-title small">Proveedor</div>
           <div class="filter-row">
             <label class="muted">Desde</label>
-            <input type="text" name="supp_from" inputmode="numeric" pattern="\d{5}" maxlength="5"
-                  value="{{ supp_from or '' }}">
+
+            <div class="lookup-wrap">
+              <input type="text"
+                    name="supp_from"
+                    id="supp_from"
+                    inputmode="numeric"
+                    pattern="\d{5}"
+                    maxlength="5"
+                    value="{{ supp_from or '' }}">
+              <button type="button" class="lookup-btn"
+                      onclick="openLookupPopup('supplier','supp_from')"
+                      title="Buscar proveedor">🔍</button>
+            </div>
+
             <label class="muted">Hasta</label>
-            <input type="text" name="supp_to" inputmode="numeric" pattern="\d{5}" maxlength="5"
-                  value="{{ supp_to or '' }}">
+
+            <div class="lookup-wrap">
+              <input type="text"
+                    name="supp_to"
+                    id="supp_to"
+                    inputmode="numeric"
+                    pattern="\d{5}"
+                    maxlength="5"
+                    value="{{ supp_to or '' }}">
+              <button type="button" class="lookup-btn"
+                      onclick="openLookupPopup('supplier','supp_to')"
+                      title="Buscar proveedor">🔍</button>
+            </div>
           </div>
         </div>
 
@@ -52,34 +76,65 @@
           <div class="filter-title small">Comprador</div>
           <div class="filter-row">
             <label class="muted">Desde</label>
-            <input type="text" name="comp_from" maxlength="4" value="{{ comp_from or '' }}">
+
+            <div class="lookup-wrap">
+              <input type="text"
+                    name="comp_from"
+                    id="comp_from"
+                    maxlength="4"
+                    value="{{ comp_from or '' }}">
+              <button type="button" class="lookup-btn"
+                      onclick="openLookupPopup('buyer','comp_from')"
+                      title="Seleccionar comprador">🔍</button>
+            </div>
+
             <label class="muted">Hasta</label>
-            <input type="text" name="comp_to" maxlength="4" value="{{ comp_to or '' }}">
+
+            <div class="lookup-wrap">
+              <input type="text"
+                    name="comp_to"
+                    id="comp_to"
+                    maxlength="4"
+                    value="{{ comp_to or '' }}">
+              <button type="button" class="lookup-btn"
+                      onclick="openLookupPopup('buyer','comp_to')"
+                      title="Seleccionar comprador">🔍</button>
+            </div>
           </div>
         </div>
+
 
         <!-- Artículo -->
         <div class="filter-group">
           <div class="filter-title small">Artículo</div>
           <div class="filter-row">
             <label class="muted">Desde</label>
-            <input type="text" name="art_from" maxlength="13" pattern="\d{13}" value="{{ art_from or '' }}">
+            <input type="text"
+                   name="art_from"
+                   maxlength="13"
+                   pattern="\d{13}"
+                   value="{{ art_from or '' }}">
             <label class="muted">Hasta</label>
-            <input type="text" name="art_to" maxlength="13" pattern="\d{13}" value="{{ art_to or '' }}">
+            <input type="text"
+                   name="art_to"
+                   maxlength="13"
+                   pattern="\d{13}"
+                   value="{{ art_to or '' }}">
           </div>
         </div>
+
       </div>
     </div>
 
   </div>
 
-  <!-- ABAJO: subfamilias (a lo ancho) -->
+  <!-- ABAJO: subfamilias -->
   <div class="filters-box filters-box--subfams">
     <div class="filter-title">Subfamilias</div>
     <div id="subfamContainer" class="subfam-container"></div>
   </div>
 
-  <!-- BOTÓN aplicar (a lo ancho, debajo) -->
+  <!-- ACCIONES -->
   <div class="filters-actions">
     <input type="hidden" name="page" value="1">
     <button class="btn btn-secondary" type="submit">Aplicar</button>

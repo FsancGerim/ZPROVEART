@@ -1,0 +1,12 @@
+body{ font-family: system-ui, Arial; margin: 12px; }
+h3{ margin: 0 0 10px; }
+.row{ display:flex; gap:8px; align-items:center; margin-bottom: 10px; }
+input{ flex:1; padding:8px 10px; border:1px solid #ccc; border-radius:10px; }
+button{ padding:8px 12px; border:1px solid #ccc; border-radius:10px; cursor:pointer; background:#f7f7f7; }
+button:hover{ background:#eee; }
+.list{ border:1px solid #eee; border-radius: 12px; overflow:auto; height: 380px; }
+.item{ padding:10px 12px; border-bottom:1px solid #f0f0f0; cursor:pointer; }
+.item:hover{ background:#f7f7f7; }
+.main{ font-weight:700; }
+.sub{ font-size:12px; opacity:.75; margin-top:2px; }
+.hint{ font-size:12px; opacity:.75; margin: 6px 0 10px; }

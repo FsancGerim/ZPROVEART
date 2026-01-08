@@ -314,7 +314,7 @@ def get_products(
 
     # Cierre CTE + paginación
     sql += f"""
-        ORDER BY ZTP.FUC_0 DESC, ZTP.ITMREF_0 DESC
+        ORDER BY ZTP.BPSNUM_0, ZTP.ITMREF_0
         OFFSET (@Page - 1) * @PageSize ROWS
         FETCH NEXT @PageSize ROWS ONLY
     )
@@ -389,9 +389,9 @@ def get_products(
     ) AS ZTCV
         ON base.ITMREF_0 = ZTCV.ITMREF_0
 
-    ORDER BY base.BPSNUM_0 DESC, base.ITMREF_0 DESC;
+    ORDER BY base.BPSNUM_0, base.ITMREF_0;
     """
-
+    # ORDER BY base.BPSNUM_0 DESC, base.ITMREF_0 DESC;
     # años al final (para el subquery)
     params.extend(years)
 
@@ -651,7 +651,7 @@ def get_products_all(
         params.append(date_to)
 
     sql += f"""
-        ORDER BY ZTP.FUC_0 DESC, ZTP.ITMREF_0 DESC
+        ORDER BY ZTP.BPSNUM_0, ZTP.ITMREF_0
     )
     SELECT
         base.ITMREF_0,
@@ -724,7 +724,7 @@ def get_products_all(
     ) AS ZTCV
         ON base.ITMREF_0 = ZTCV.ITMREF_0
 
-    ORDER BY base.FUC_0 DESC, base.ITMREF_0 DESC;
+    ORDER BY base.BPSNUM_0, base.ITMREF_0;
     """
 
     params.extend(years)
@@ -732,6 +732,46 @@ def get_products_all(
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute(sql, params)
+        cols = [c[0] for c in cur.description]
+        return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+def get_buyers_distinct() -> list[dict]:
+    sql = """
+    SELECT DISTINCT LTRIM(RTRIM(COD_COM_0)) AS COD_COM_0
+    FROM ZTPROVEART
+    WHERE COD_COM_0 IS NOT NULL
+      AND LTRIM(RTRIM(COD_COM_0)) <> ''
+    ORDER BY LTRIM(RTRIM(COD_COM_0));
+    """
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(sql)
+        cols = [c[0] for c in cur.description]
+        return [dict(zip(cols, row)) for row in cur.fetchall()]
+
+def search_suppliers(q: str, limit: int = 60) -> list[dict]:
+    q = (q or "").strip()
+    if not q:
+        return []
+
+    sql = """
+    SELECT TOP (?)
+        BPSNUM_0,
+        BPSNAM_0
+    FROM BPSUPPLIER
+    WHERE (BPSNUM_0 LIKE ?)
+       OR (BPSNAM_0 LIKE ?)
+    ORDER BY
+        CASE WHEN BPSNUM_0 LIKE ? THEN 0 ELSE 1 END,
+        BPSNUM_0;
+    """
+
+    like_code = f"{q}%"
+    like_name = f"%{q}%"
+
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute(sql, [limit, like_code, like_name, like_code])
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 

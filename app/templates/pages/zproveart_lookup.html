@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Lookup</title>
+  <link rel="stylesheet" href="/static/css/zproveart/zproveart_lookup.css">
+</head>
+<body>
+
+  {% if kind == "supplier" %}
+    <h3>Seleccionar proveedor</h3>
+    <div class="hint">Escribe código o nombre. Enter para buscar.</div>
+  {% else %}
+    <h3>Seleccionar comprador</h3>
+    <div class="hint">Selecciona un comprador.</div>
+  {% endif %}
+
+  <div class="row">
+    <input id="q" type="text" placeholder="{% if kind == 'supplier' %}Buscar proveedor...{% else %}Filtrar (opcional)...{% endif %}">
+    <button id="btnSearch" type="button">{% if kind == 'supplier' %}Buscar{% else %}Filtrar{% endif %}</button>
+    <button type="button" id="btnClose">Cerrar</button>
+  </div>
+
+  <div id="status" class="hint"></div>
+  <div id="list" class="list"></div>
+
+  <script>
+    window.LOOKUP_CFG = { kind: "{{ kind }}", target: "{{ target }}" };
+  </script>
+  <script src="/static/js/zproveart.js"></script>
+</body>
+</html>

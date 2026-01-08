@@ -250,3 +250,178 @@ document.addEventListener("click", function (e) {
     btn.textContent = originalText;
   }, 15000);
 });
+
+// =========================
+// Popup lookup (proveedor/comprador)
+// =========================
+window.openLookupPopup = function(type, targetId) {
+  const w = 780;
+  const h = 520;
+  const left = Math.max(0, Math.floor((window.screen.width - w) / 2));
+  const top  = Math.max(0, Math.floor((window.screen.height - h) / 2));
+
+  const url = `/zproveart/lookup/${encodeURIComponent(type)}?target=${encodeURIComponent(targetId)}`;
+
+  const win = window.open(
+    url,
+    `lookup_${type}`,
+    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`
+  );
+
+  if (!win) {
+    alert("El navegador ha bloqueado el popup. Permite popups para este sitio.");
+  }
+};
+
+window.setLookupValue = function(targetId, value) {
+  const input = document.getElementById(targetId);
+  if (input) {
+    input.value = value;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+};
+
+// =========================
+// Lógica del popup lookup (solo se ejecuta en la ventana popup)
+// Requiere que el HTML del popup defina window.LOOKUP_CFG
+// =========================
+(() => {
+  if (!window.LOOKUP_CFG) return;
+
+  const cfg = window.LOOKUP_CFG;
+
+  const qEl = document.getElementById("q");
+  const listEl = document.getElementById("list");
+  const statusEl = document.getElementById("status");
+  const btnSearch = document.getElementById("btnSearch");
+  const btnClose = document.getElementById("btnClose");
+
+  if (!qEl || !listEl || !statusEl) return;
+
+  btnClose?.addEventListener("click", () => window.close());
+
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function renderSupplier(it){
+    return `
+      <div class="item" data-value="${esc(it.BPSNUM_0)}">
+        <div class="main">${esc(it.BPSNUM_0)} - ${esc(it.BPSNAM_0 || "")}</div>
+        <div class="sub">Proveedor</div>
+      </div>`;
+  }
+
+  function renderBuyer(it){
+    return `
+      <div class="item" data-value="${esc(it.COD_COM_0)}">
+        <div class="main">${esc(it.COD_COM_0)}</div>
+        <div class="sub">Comprador</div>
+      </div>`;
+  }
+
+  // ===== typeahead helpers =====
+  let debounceTimer = null;
+  let aborter = null;
+
+  function debounce(fn, ms) {
+    return (...args) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fn(...args), ms);
+    };
+  }
+
+  async function load() {
+    listEl.innerHTML = "";
+    const q = (qEl.value || "").trim();
+
+    // ✅ Supplier: evita buscar si está vacío / demasiado corto
+    if (cfg.kind === "supplier") {
+      const MIN_CHARS = 1; // pon 2 si quieres que empiece en "24" en vez de "2"
+      if (q.length < MIN_CHARS) {
+        statusEl.textContent = "Escribe para buscar…";
+        return;
+      }
+    }
+
+    statusEl.textContent = "Cargando…";
+
+    try {
+      // ✅ cancelar request anterior si estás tecleando
+      if (aborter) aborter.abort();
+      aborter = new AbortController();
+
+      let url = "";
+      if (cfg.kind === "supplier") {
+        url = `/api/lookup/suppliers?q=${encodeURIComponent(q)}&limit=80`;
+      } else {
+        url = `/api/lookup/buyers`;
+      }
+
+      const res = await fetch(url, {
+        headers: { "Accept":"application/json" },
+        signal: aborter.signal
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+
+      const data = await res.json();
+      let items = data.items || [];
+
+      // filtro local para buyer (opc)
+      if (cfg.kind === "buyer" && q) {
+        items = items.filter(x => String(x.COD_COM_0 || "").includes(q));
+      }
+
+      if (!items.length) {
+        statusEl.textContent = "Sin resultados.";
+        return;
+      }
+
+      statusEl.textContent = `${items.length} resultado(s).`;
+      listEl.innerHTML = items.map(cfg.kind === "supplier" ? renderSupplier : renderBuyer).join("");
+
+    } catch (e) {
+      if (e && e.name === "AbortError") return; // cancelado por nueva tecla
+      console.error(e);
+      statusEl.textContent = "Error cargando datos.";
+    }
+  }
+
+  const loadDebounced = debounce(load, 250);
+
+  listEl.addEventListener("click", (e) => {
+    const item = e.target.closest(".item");
+    if (!item) return;
+
+    const value = item.dataset.value;
+
+    if (window.opener && typeof window.opener.setLookupValue === "function") {
+      window.opener.setLookupValue(cfg.target, value);
+    }
+    window.close();
+  });
+
+  // Botón buscar sigue funcionando
+  btnSearch?.addEventListener("click", load);
+
+  // Enter busca
+  qEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      load();
+    }
+  });
+
+  // ✅ Autocomplete SOLO para supplier
+  if (cfg.kind === "supplier") {
+    qEl.addEventListener("input", () => loadDebounced());
+  }
+
+  // Autocarga compradores
+  if (cfg.kind === "buyer") load();
+})();

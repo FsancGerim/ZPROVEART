@@ -7,9 +7,6 @@ from threading import Lock
 
 from openpyxl import Workbook, load_workbook
 
-import socket
-
-
 @dataclass(frozen=True)
 class ExcelExporter:
     export_dir: Path
@@ -24,14 +21,27 @@ class ExcelExporter:
 
 
 _lock = Lock()
-PC_NAME = socket.gethostname()
 
 
-def append_row_daily(exporter: ExcelExporter, itmref: str, selected: bool, comment: str, bpsnum: str) -> Path:
+def append_row_daily(
+    exporter: ExcelExporter,
+    itmref: str,
+    selected: bool,
+    comment: str,
+    bpsnum: str,
+    user_ad: str,   # 👈 nuevo
+) -> Path:
     filepath = exporter.daily_path()
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    row = [ts, itmref, "1" if selected else "0", comment, PC_NAME, bpsnum]
+    row = [
+        ts,
+        itmref,
+        "1" if selected else "0",
+        comment,
+        user_ad,      # 👈 aquí
+        bpsnum,
+    ]
 
     with _lock:
         if filepath.exists():
@@ -41,7 +51,14 @@ def append_row_daily(exporter: ExcelExporter, itmref: str, selected: bool, comme
             wb = Workbook()
             ws = wb.active
             ws.title = "ZPROVEART"
-            ws.append(["timestamp", "itmref", "selected", "comment", "pc_name", "cod_proveedor"])
+            ws.append([
+                "timestamp",
+                "itmref",
+                "selected",
+                "comment",
+                "user_ad",
+                "cod_proveedor",
+            ])
 
         ws.append(row)
         wb.save(filepath)

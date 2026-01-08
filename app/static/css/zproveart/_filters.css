@@ -321,3 +321,51 @@
     padding-right: 0;
   }
 }
+
+/* =========================================================
+   LOOKUP (input + lupa) integrado con la grid de filter-row
+   ========================================================= */
+
+/* El wrapper ocupa el slot completo y alinea input + botón */
+.filter-row .lookup-wrap{
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 0; /* para que quede pegado */
+}
+
+/* El input dentro del wrapper debe verse igual que los demás */
+.filter-row .lookup-wrap input{
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  font-family: inherit;
+  font-size: 13px;
+
+  /* pegado con el botón */
+  border-radius: 10px 0 0 10px;
+  border-right: 0;
+}
+
+/* Botón lupa pegado al input */
+.filter-row .lookup-wrap .lookup-btn{
+  width: 40px;
+  min-width: 40px;
+  height: auto;              /* se estira con el input */
+  padding: 0;
+  border: 1px solid #cfcfcf;
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: #f7f7f7;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.filter-row .lookup-wrap .lookup-btn:hover{
+  background: #eee;
+}
+

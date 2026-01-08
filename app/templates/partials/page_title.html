@@ -10,10 +10,18 @@
     <h1>ZPROVEART</h1>
 
     <!-- Derecha: botón filtros -->
-    <button type="button"
-            class="btn btn-secondary page-filters-toggle js-filters-toggle"
-            aria-expanded="false"
-            aria-label="Mostrar filtros">
-      <span class="chev">▾</span>
-    </button>
+    <div class="der-div">
+      <div>
+        {{ user.username }}
+      <button type="button" class="btn btn-secondary" onclick="window.location.href='/logout'">
+        Salir
+      </button>
+      </div>
+      <button type="button"
+              class="btn btn-secondary page-filters-toggle js-filters-toggle"
+              aria-expanded="false"
+              aria-label="Mostrar filtros">
+        <span class="chev">▾</span>
+      </button>
+    </div>
 </div>

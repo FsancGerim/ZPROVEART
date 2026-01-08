@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Request, Query, Response
+from fastapi import FastAPI, Request, Query, Response, HTTPException, status, APIRouter
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-
+from urllib.parse import quote
+from fastapi.responses import RedirectResponse
 from app.db.sqlserver import (
     get_products,
     get_sales_12m,
@@ -10,7 +11,9 @@ from app.db.sqlserver import (
     get_fams_cached,
     get_subfams_cached,
     get_eta_rows,
-    get_products_all
+    get_products_all,
+    get_buyers_distinct,
+    search_suppliers,
 )
 from app.services.product_formatter import format_products
 from app.services.filters import parse_date
@@ -23,6 +26,13 @@ import math
 
 from datetime import date
 from io import BytesIO
+
+import os
+from fastapi import Form
+from fastapi.responses import RedirectResponse
+from starlette.middleware.sessions import SessionMiddleware
+import json
+from passlib.context import CryptContext
 
 PdfMerger = None
 PdfWriter = None
@@ -40,11 +50,57 @@ except Exception as e:
         _pypdf_import_error = e2
 
 app = FastAPI()
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET", "DEV_ONLY_CHANGE_ME"),
+    same_site="lax",
+    https_only=False,
+)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 app.include_router(fotos.router)
 
 exporter = ExcelExporter(EXPORT_DIR)
+
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+USERS_FILE = Path(__file__).resolve().parent / "data" / "users.json"
+
+def require_login(request: Request, *, redirect: bool = True) -> dict:
+    user = request.session.get("user")
+    if user:
+        return user
+
+    if redirect:
+        # path + query para volver exactamente donde estaba
+        next_url = request.url.path
+        if request.url.query:
+            next_url += "?" + request.url.query
+
+        return RedirectResponse(url=f"/login?next={quote(next_url)}", status_code=303)
+
+    # para endpoints tipo API
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+
+def load_users() -> dict[str, dict]:
+    if not USERS_FILE.exists():
+        return {}
+    data = json.loads(USERS_FILE.read_text("utf-8"))
+    out: dict[str, dict] = {}
+    for u in data.get("users", []):
+        name = (u.get("username") or "").strip()
+        if name:
+            out[name] = u
+    return out
+
+def verify_user(username: str, password: str) -> bool:
+    users = load_users()
+    u = users.get(username)
+    if not u or not u.get("active", True):
+        return False
+    ph = (u.get("password_hash") or "").strip()
+    if not ph:
+        return False
+    return pwd_context.verify(password, ph)
 
 
 def _default_years() -> list[int]:
@@ -52,9 +108,48 @@ def _default_years() -> list[int]:
     return [y, y - 1]
 
 
-@app.get("/")
-def root():
-    return {"status": "ok"}
+@app.get("/login", response_class=HTMLResponse)
+def login_get(request: Request, next: str = "/zproveart"):
+    if request.session.get("user"):
+        return RedirectResponse(url=next or "/zproveart", status_code=303)
+
+    return templates.TemplateResponse(
+        "pages/login.html",
+        {
+            "request": request,
+            "next": next,
+            "error": None,
+            "use_zproveart_css": False,
+        },
+    )
+@app.post("/login", response_class=HTMLResponse)
+async def login_post(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    next: str = Form("/zproveart"),
+):
+    username = (username or "").strip()
+    next_url = next or "/zproveart"
+
+    if verify_user(username, password):
+        request.session["user"] = {"username": username}
+        return RedirectResponse(url=next_url, status_code=303)
+
+    return templates.TemplateResponse(
+        "pages/login.html",
+        {
+            "request": request,
+            "next": next_url,
+            "error": "Usuario o contraseña incorrectos",
+            "use_zproveart_css": False,  # ✅ importante si base.html lo usa
+        },
+        status_code=401,
+    )
+@app.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/login", status_code=303)
 
 
 # Endpoint para cargar subfamilias al vuelo (AJAX) - 1 familia
@@ -70,10 +165,18 @@ def zproveart_home(
     page: str = "1",
     family: list[str] = Query(default=[]),
 ):
+    auth = require_login(request, redirect=True)
+    if isinstance(auth, RedirectResponse):
+        return auth
+    user = auth
+
     try:
         page = int(page)
     except:
         page = 1
+
+    # usuario
+    user = request.session.get("user")
 
     # fechas (sanitize)
     date_from = parse_date(request.query_params.get("from"))
@@ -129,7 +232,6 @@ def zproveart_home(
     total_pages = max(1, math.ceil(total / PAGE_SIZE))
     page = max(1, min(page, total_pages))
 
-    # ✅ años para ZTCOMVEN: año actual + anterior
     years = _default_years()
 
     products = get_products(
@@ -145,7 +247,7 @@ def zproveart_home(
         comp_to=comp_to,
         art_from=art_from,
         art_to=art_to,
-        years=years,  # ✅ antes year=2025
+        years=years, 
     )
 
     itmrefs = [p["ITMREF_0"] for p in products if p.get("ITMREF_0")]
@@ -178,6 +280,7 @@ def zproveart_home(
             "comp_to": comp_to,
             "art_from": art_from,
             "art_to": art_to,
+            "user": user,
         },
     )
 
@@ -189,9 +292,11 @@ async def zproveart_submit(request: Request):
     itmref = (form.get("itmref") or "").strip()
     bpsnum = (form.get("bpsnum") or "").strip()
     comment = (form.get("comment") or "").strip()
+    user = request.session.get("user")
 
     selected_raw = form.get("selected")
     selected = selected_raw in ("1", "on", "true", "True")
+
 
     if itmref:
         append_row_daily(
@@ -199,7 +304,8 @@ async def zproveart_submit(request: Request):
             itmref=itmref,
             selected=selected,
             comment=comment,
-            bpsnum=bpsnum
+            bpsnum=bpsnum,
+            user_ad=user['username'],
         )
 
     return Response(status_code=204)
@@ -207,6 +313,10 @@ async def zproveart_submit(request: Request):
 
 @app.get("/zproveart/pdf")
 def zproveart_pdf(request: Request, family: list[str] = Query(default=[])):
+
+    auth = require_login(request, redirect=True)
+    if isinstance(auth, RedirectResponse):
+        return auth
     # filtros
     date_from = parse_date(request.query_params.get("from"))
     date_to = parse_date(request.query_params.get("to"))
@@ -408,3 +518,35 @@ def _render_pdf_chunk(
         footer_template="<div></div>",
         margin={"top": "18mm", "bottom": "0mm", "left": "0mm", "right": "0mm"},
     )
+router = APIRouter()
+@app.get("/zproveart/lookup/{kind}", response_class=HTMLResponse)
+def lookup_popup(request: Request, kind: str, target: str = ""):
+    auth = require_login(request, redirect=True)
+    if isinstance(auth, RedirectResponse):
+        return auth
+
+    kind = (kind or "").strip().lower()
+    if kind not in ("supplier", "buyer"):
+        kind = "supplier"
+
+    return templates.TemplateResponse(
+        "pages/zproveart_lookup.html",
+        {"request": request, "kind": kind, "target": target},
+    )
+app.include_router(router)
+@app.get("/api/lookup/suppliers")
+def api_lookup_suppliers(
+    request: Request,
+    q: str = Query(default=""),
+    limit: int = Query(default=80, ge=1, le=200),
+):
+    require_login(request, redirect=False)
+    items = search_suppliers(q=q, limit=limit)
+    return {"items": items}
+
+
+@app.get("/api/lookup/buyers")
+def api_lookup_buyers(request: Request):
+    auth = require_login(request, redirect=False)
+    rows = get_buyers_distinct()
+    return {"items": rows}
